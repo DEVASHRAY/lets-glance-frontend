@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import {
+  startTransition,
   useActionState,
   useEffect,
   useLayoutEffect,
@@ -10,7 +11,6 @@ import {
   useState,
   useTransition,
 } from "react";
-import { useFormStatus } from "react-dom";
 
 import { ChatConstantsCollection } from "@/features/chat/chat.constants";
 import {
@@ -55,6 +55,7 @@ type RenderedMessage = MessageHistoryItem | OptimisticMessage;
 
 interface MessageSubmitButtonProps {
   messageIsEmpty: boolean;
+  pending: boolean;
 }
 
 interface PendingScrollRestoration {
@@ -102,9 +103,10 @@ const insertMessage = ({
   ];
 };
 
-const MessageSubmitButton = ({ messageIsEmpty }: MessageSubmitButtonProps) => {
-  const { pending } = useFormStatus();
-
+const MessageSubmitButton = ({
+  messageIsEmpty,
+  pending,
+}: MessageSubmitButtonProps) => {
   return (
     <button
       type="submit"
@@ -283,10 +285,8 @@ export const ConversationMessages = ({
     }
   };
 
-  const [sendMessageState, sendMessageFormAction] = useActionState(
-    processSendMessage,
-    initialSendMessageActionState,
-  );
+  const [sendMessageState, sendMessageFormAction, sendMessagePending] =
+    useActionState(processSendMessage, initialSendMessageActionState);
   const latestMessageId = optimisticMessages.at(-1)?.id;
 
   const loadOlderMessages = async (): Promise<void> => {
@@ -725,9 +725,14 @@ export const ConversationMessages = ({
       </div>
 
       <form
-        action={sendMessageFormAction}
-        onSubmit={() => {
+        onSubmit={(event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+
           setMessageText("");
+          startTransition(() => {
+            sendMessageFormAction(formData);
+          });
         }}
         className="shrink-0 border-t border-zinc-100 bg-white p-3"
       >
@@ -751,7 +756,10 @@ export const ConversationMessages = ({
             placeholder="Write a message"
             className="min-h-11 flex-1 resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm leading-5 outline-none transition placeholder:text-zinc-400 focus:border-[#f32672]/50 focus:bg-white focus:ring-4 focus:ring-[#f32672]/10"
           />
-          <MessageSubmitButton messageIsEmpty={!messageText.trim()} />
+          <MessageSubmitButton
+            messageIsEmpty={!messageText.trim()}
+            pending={sendMessagePending}
+          />
         </div>
 
         {sendMessageState.message ? (
@@ -770,8 +778,8 @@ export const ConversationMessages = ({
 
 /*
  * React 19 learning notes
- * - `useActionState` coordinates the send Action's result and pending lifecycle.
- * - `useFormStatus` lets the nested send button read its parent form's status.
+ * - `useActionState` coordinates the manually dispatched send Action's result
+ *   and pending state after the form snapshots its data and clears the draft.
  * - `useOptimistic` shows a clock-marked bubble until storage confirms it;
  *   React 18.2 required manually managed temporary-message state.
  * - The async `useTransition` Action tracks older-page loading across `await`;
