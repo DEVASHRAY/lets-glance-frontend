@@ -166,6 +166,7 @@ export const ConversationMessages = ({
     initialClientMessageId,
   );
   const messageViewport = useRef<HTMLDivElement>(null);
+  const messageTextarea = useRef<HTMLTextAreaElement>(null);
   const shouldScrollToLatestMessage = useRef(true);
   const olderMessagesRequestPending = useRef(false);
   const olderMessagesAbortController = useRef<AbortController | null>(null);
@@ -416,6 +417,17 @@ export const ConversationMessages = ({
       }
     });
   };
+
+  useLayoutEffect(() => {
+    const textarea = messageTextarea.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${String(Math.min(textarea.scrollHeight, 128))}px`;
+  }, [messageText]);
 
   useLayoutEffect(() => {
     const viewport = messageViewport.current;
@@ -916,17 +928,40 @@ export const ConversationMessages = ({
             Message
           </label>
           <textarea
+            ref={messageTextarea}
             id="chat-message"
             name="text"
             value={messageText}
             onChange={(event) => {
               setMessageText(event.target.value);
             }}
+            onKeyDown={(event) => {
+              if (
+                event.key !== "Enter" ||
+                event.shiftKey ||
+                event.nativeEvent.isComposing
+              ) {
+                return;
+              }
+
+              event.preventDefault();
+
+              if (!messageText.trim() || sendMessagePending) {
+                return;
+              }
+
+              const form = event.currentTarget.form;
+
+              if (form) {
+                form.requestSubmit();
+              }
+            }}
             required
             maxLength={2_000}
             rows={1}
+            enterKeyHint="send"
             placeholder="Write a message"
-            className="min-h-11 flex-1 resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm leading-5 outline-none transition placeholder:text-zinc-400 focus:border-[#f32672]/50 focus:bg-white focus:ring-4 focus:ring-[#f32672]/10"
+            className="max-h-32 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm leading-5 outline-none transition placeholder:text-zinc-400 focus:border-[#f32672]/50 focus:bg-white focus:ring-4 focus:ring-[#f32672]/10"
           />
           <MessageSubmitButton
             messageIsEmpty={!messageText.trim()}
