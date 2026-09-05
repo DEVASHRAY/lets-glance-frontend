@@ -18,6 +18,9 @@ type SignupMode =
 type OtpSignupStep =
   (typeof SignupConstantsCollection.OtpSignupStep)[keyof typeof SignupConstantsCollection.OtpSignupStep];
 
+type SignupActionField =
+  (typeof SignupConstantsCollection.SignupActionField)[keyof typeof SignupConstantsCollection.SignupActionField];
+
 interface ReadFieldInput {
   formData: FormData;
   name: string;
@@ -81,9 +84,11 @@ type SignupResult = SignupConflict | SignupFailure | SignupSuccess;
 
 export interface SignupActionState {
   email: string;
+  field: SignupActionField | null;
   isError: boolean;
   message: string;
   mode: SignupMode;
+  responseId: number;
   session: number;
   step: OtpSignupStep;
   success: boolean;
@@ -91,9 +96,11 @@ export interface SignupActionState {
 
 export const initialSignupActionState: SignupActionState = {
   email: "",
+  field: null,
   isError: false,
   message: "",
   mode: SignupConstantsCollection.SignupMode.Otp,
+  responseId: 0,
   session: 0,
   step: SignupConstantsCollection.OtpSignupStep.Email,
   success: false,
@@ -146,9 +153,7 @@ const isUserInterest = (value: string): value is UserInterest => {
   );
 };
 
-const isStrongPassword = ({
-  password,
-}: IsStrongPasswordInput): boolean => {
+const isStrongPassword = ({ password }: IsStrongPasswordInput): boolean => {
   if (password.length < 8 || password.length > 32) {
     return false;
   }
@@ -266,12 +271,15 @@ export const signupAction = async (
   const weekdayPace = readField({ formData, name: "weekdayPace" });
   const socialBattery = readField({ formData, name: "socialBattery" });
   const movieNightStyle = readField({ formData, name: "movieNightStyle" });
+  const resendOtp = readField({ formData, name: "resendOtp" }) === "true";
   const interestedIn: UserInterest[] = [];
   const currentState: SignupActionState = {
     email,
+    field: null,
     isError: true,
     message: "",
     mode,
+    responseId: previousState.responseId + 1,
     session,
     step: SignupConstantsCollection.OtpSignupStep.Email,
     success: false,
@@ -290,7 +298,10 @@ export const signupAction = async (
     }
   }
 
-  if (name.length < 2 || name.length > ProfileConstantsCollection.FieldLimit.Name) {
+  if (
+    name.length < 2 ||
+    name.length > ProfileConstantsCollection.FieldLimit.Name
+  ) {
     return {
       ...currentState,
       message: "Name needs 2 to 50 characters",
@@ -300,6 +311,7 @@ export const signupAction = async (
   if (!isValidEmail({ email })) {
     return {
       ...currentState,
+      field: SignupConstantsCollection.SignupActionField.Email,
       message: "Enter a valid email address",
     };
   }
@@ -311,10 +323,10 @@ export const signupAction = async (
     };
   }
 
-  if (!Number.isInteger(age) || age < 18) {
+  if (!Number.isInteger(age) || age < 18 || age > 120) {
     return {
       ...currentState,
-      message: "You need to be 18 or older",
+      message: "Enter an age between 18 and 120",
     };
   }
 
@@ -322,6 +334,27 @@ export const signupAction = async (
     return {
       ...currentState,
       message: "Pick who you want to meet",
+    };
+  }
+
+  if (bio.length > ProfileConstantsCollection.FieldLimit.Bio) {
+    return {
+      ...currentState,
+      message: `Bio must be ${String(ProfileConstantsCollection.FieldLimit.Bio)} characters or fewer`,
+    };
+  }
+
+  if (jobTitle.length > ProfileConstantsCollection.FieldLimit.JobTitle) {
+    return {
+      ...currentState,
+      message: `Job title must be ${String(ProfileConstantsCollection.FieldLimit.JobTitle)} characters or fewer`,
+    };
+  }
+
+  if (city.length > ProfileConstantsCollection.FieldLimit.City) {
+    return {
+      ...currentState,
+      message: `City must be ${String(ProfileConstantsCollection.FieldLimit.City)} characters or fewer`,
     };
   }
 
@@ -373,6 +406,7 @@ export const signupAction = async (
     if (typeof password !== "string" || !isStrongPassword({ password })) {
       return {
         ...currentState,
+        field: SignupConstantsCollection.SignupActionField.Password,
         message:
           "Password needs 8–32 characters with upper, lower, a number, and a symbol",
       };
@@ -386,7 +420,7 @@ export const signupAction = async (
       previousState.email === email &&
       previousState.step === SignupConstantsCollection.OtpSignupStep.Code;
 
-    if (!isCurrentCodeStep) {
+    if (!isCurrentCodeStep || resendOtp) {
       try {
         const response = await fetch("/api/v1/auth/otp/send", {
           method: "POST",
@@ -401,6 +435,7 @@ export const signupAction = async (
         if (!response.ok) {
           return {
             ...currentState,
+            field: SignupConstantsCollection.SignupActionField.Email,
             message:
               response.status === 429
                 ? "Too many code requests. Please wait before trying again."
@@ -419,6 +454,7 @@ export const signupAction = async (
       } catch (error) {
         return {
           ...currentState,
+          field: SignupConstantsCollection.SignupActionField.Email,
           message:
             error instanceof Error
               ? "Unable to reach the authentication service"
@@ -432,6 +468,7 @@ export const signupAction = async (
     if (!/^\d{6}$/.test(otp)) {
       return {
         ...currentState,
+        field: SignupConstantsCollection.SignupActionField.Otp,
         message: "Enter the 6-digit verification code",
         step: SignupConstantsCollection.OtpSignupStep.Code,
       };
@@ -448,20 +485,22 @@ export const signupAction = async (
     if (result.outcome === AuthConstantsCollection.SignupOutcome.Conflict) {
       return {
         ...currentState,
+        field: SignupConstantsCollection.SignupActionField.Email,
         message: "That email is already on Tinder Lite",
       };
     }
 
     if (result.outcome === AuthConstantsCollection.SignupOutcome.Failure) {
-      const isOtpSignup =
-        mode === SignupConstantsCollection.SignupMode.Otp;
+      const isOtpSignup = mode === SignupConstantsCollection.SignupMode.Otp;
       const isInvalidOtpStatus =
-        result.status === 400 ||
-        result.status === 401 ||
-        result.status === 422;
+        result.status === 400 || result.status === 401 || result.status === 422;
 
       return {
         ...currentState,
+        field:
+          isOtpSignup && isInvalidOtpStatus
+            ? SignupConstantsCollection.SignupActionField.Otp
+            : null,
         message:
           isOtpSignup && result.status === 429
             ? "Too many attempts. Please wait before trying again."

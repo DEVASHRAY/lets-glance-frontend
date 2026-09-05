@@ -77,24 +77,24 @@ enum SleepWindow {
 }
 
 const MovieNightStyleLabel = {
-  [MovieNightStyle.CouchRewatch]: "Same film, same couch, no talking",
-  [MovieNightStyle.CrowdedFirstDay]: "First-day crowd, loud interval",
-  [MovieNightStyle.SilentSubtitles]: "Lights down, subtitles on",
-  [MovieNightStyle.TheatreInterval]: "Theatre seat, then interval chai",
+  [MovieNightStyle.CouchRewatch]: "Rewatching a comfort movie at home",
+  [MovieNightStyle.CrowdedFirstDay]: "A new release with a lively crowd",
+  [MovieNightStyle.SilentSubtitles]: "Watching quietly with subtitles",
+  [MovieNightStyle.TheatreInterval]: "A relaxed cinema trip with snacks",
 } satisfies Record<MovieNightStyle, string>;
 
 const WeekdayPaceLabel = {
-  [WeekdayPace.NightShiftBrain]: "Alive after 11",
-  [WeekdayPace.PackedCalendar]: "Calendar is the personality",
-  [WeekdayPace.SlowMorning]: "Slow morning, late start",
-  [WeekdayPace.SplitShift]: "Two workdays in one",
+  [WeekdayPace.NightShiftBrain]: "Most active late at night",
+  [WeekdayPace.PackedCalendar]: "A packed schedule most days",
+  [WeekdayPace.SlowMorning]: "A slow start to the day",
+  [WeekdayPace.SplitShift]: "A workday split into two parts",
 } satisfies Record<WeekdayPace, string>;
 
 const SocialBatteryLabel = {
-  [SocialBattery.CrowdFirst]: "Walks into the noise",
-  [SocialBattery.OneOnOne]: "One person, full attention",
-  [SocialBattery.QuietHome]: "Recharges at home",
-  [SocialBattery.SmallCircle]: "Four people, max",
+  [SocialBattery.CrowdFirst]: "A lively event with lots of people",
+  [SocialBattery.OneOnOne]: "One-on-one time",
+  [SocialBattery.QuietHome]: "A quiet evening at home",
+  [SocialBattery.SmallCircle]: "A small group of close friends",
 } satisfies Record<SocialBattery, string>;
 
 const HomeEnergyLabel = {

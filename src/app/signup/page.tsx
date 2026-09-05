@@ -4,7 +4,7 @@ import { SignupFlow } from "@/features/auth/signup-flow";
 
 export const metadata: Metadata = {
   title: "Join | Tinder Lite",
-  description: "Create a Tinder Lite profile in under two minutes.",
+  description: "Create a Tinder Lite profile and start meeting new people.",
 };
 
 const SignupPage = () => {

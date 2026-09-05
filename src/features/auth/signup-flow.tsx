@@ -1,52 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { useActionState, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+  type RefObject,
+} from "react";
+import { useFormStatus } from "react-dom";
+import { z } from "zod";
 
-import { AuthConstantsCollection } from "@/features/auth/auth.constants";
-import { SignupChoice } from "@/features/auth/signup-choice";
 import { SignupConstantsCollection } from "@/features/auth/signup.constants";
 import {
   initialSignupActionState,
   signupAction,
 } from "@/features/auth/signup.action";
-import { SignupSubmitButton } from "@/features/auth/signup-submit-button";
 import { ProfileConstantsCollection } from "@/features/profile/profile.constants";
 
-type UserGender =
-  (typeof ProfileConstantsCollection.UserGender)[keyof typeof ProfileConstantsCollection.UserGender];
+import styles from "./signup-flow.module.css";
 
 type UserInterest =
   (typeof ProfileConstantsCollection.UserInterest)[keyof typeof ProfileConstantsCollection.UserInterest];
 
-type SignupStep =
-  (typeof AuthConstantsCollection.SignupStep)[keyof typeof AuthConstantsCollection.SignupStep];
-
 type SignupMode =
   (typeof SignupConstantsCollection.SignupMode)[keyof typeof SignupConstantsCollection.SignupMode];
 
-interface SignupDraft {
-  age: number;
-  bio: string;
-  city: string;
-  email: string;
-  gender: string;
-  interestedIn: UserInterest[];
-  jobTitle: string;
-  movieNightStyle: string;
+type SignupGender =
+  | typeof ProfileConstantsCollection.UserGender.Female
+  | typeof ProfileConstantsCollection.UserGender.Male;
+
+enum SignupStep {
+  Account = "account",
+  Basics = "basics",
+  Bio = "bio",
+  Hook = "hook",
+  People = "people",
+  Vibe = "vibe",
+  World = "world",
+}
+
+interface ChoiceInputProps {
+  checked: boolean;
+  description?: string;
+  label: string;
   name: string;
-  password: string;
-  socialBattery: string;
-  weekdayPace: string;
+  onSelect: () => void;
+  type: "checkbox" | "radio";
+  value: string;
 }
 
-interface GetStepIndexInput {
-  step: SignupStep;
-}
-
-interface GetStepHintInput {
-  draft: SignupDraft;
+interface GetStepInput {
   step: SignupStep;
 }
 
@@ -54,17 +61,14 @@ interface HandleSignupSubmitInput {
   event: FormEvent<HTMLFormElement>;
 }
 
-interface SignupCardPreview {
-  age: number;
-  bio: string;
-  city: string;
-  jobTitle: string;
-  joining: boolean;
-  name: string;
+interface HiddenProfileFieldsProps {
+  draft: SignupDraft;
+  mode: SignupMode;
+  session: number;
 }
 
-interface SignupPreviewCardProps {
-  preview: SignupCardPreview;
+interface ProfilePreviewProps {
+  draft: SignupDraft;
 }
 
 interface SignupMessageProps {
@@ -72,34 +76,82 @@ interface SignupMessageProps {
   message: string;
 }
 
-interface SignupModeSwitchProps {
-  disabled: boolean;
-  label: string;
-  onSwitch: () => void;
-  prompt: string;
+interface SignupSubmitButtonProps {
+  disabled?: boolean;
+  idleLabel: string;
+  pendingLabel: string;
+  resendPendingLabel?: string;
 }
 
-interface SignupHiddenProfileFieldsProps {
-  draft: SignupDraft;
-  mode: SignupMode;
-  session: number;
+interface StepIntroProps {
+  description: string;
+  eyebrow: string;
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  title: string;
 }
 
 interface ToggleInterestInput {
   interest: UserInterest;
 }
 
-const HUGE_INPUT_CLASS_NAME =
-  "w-full bg-transparent text-4xl font-semibold tracking-[-0.05em] text-white outline-none placeholder:text-white/25 sm:text-6xl";
+const SIGNUP_GENDER_OPTIONS: SignupGender[] = [
+  ProfileConstantsCollection.UserGender.Female,
+  ProfileConstantsCollection.UserGender.Male,
+];
 
-const FIELD_INPUT_CLASS_NAME =
-  "min-h-14 w-full rounded-2xl border border-white/15 bg-white/8 px-4 text-lg text-white outline-none transition placeholder:text-white/35 hover:border-white/30 focus:border-zinc-400 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-zinc-300 aria-invalid:border-rose-300 aria-invalid:focus:border-zinc-400 disabled:cursor-wait disabled:opacity-65";
+const signupDraftSchema = z.object({
+  age: z.number().int().min(0).max(120),
+  bio: z.string().max(ProfileConstantsCollection.FieldLimit.Bio),
+  city: z.string().max(ProfileConstantsCollection.FieldLimit.City),
+  email: z.string().max(254),
+  gender: z.union([z.literal(""), z.enum(SIGNUP_GENDER_OPTIONS)]).catch(""),
+  interestedIn: z
+    .array(z.enum(ProfileConstantsCollection.UserInterest))
+    .max(Object.values(ProfileConstantsCollection.UserInterest).length),
+  jobTitle: z.string().max(ProfileConstantsCollection.FieldLimit.JobTitle),
+  movieNightStyle: z.union([
+    z.literal(""),
+    z.enum(ProfileConstantsCollection.MovieNightStyle),
+  ]),
+  name: z.string().max(ProfileConstantsCollection.FieldLimit.Name),
+  socialBattery: z.union([
+    z.literal(""),
+    z.enum(ProfileConstantsCollection.SocialBattery),
+  ]),
+  weekdayPace: z.union([
+    z.literal(""),
+    z.enum(ProfileConstantsCollection.WeekdayPace),
+  ]),
+});
+
+const persistedSignupSchema = z.object({
+  draft: signupDraftSchema,
+  step: z.enum(SignupStep),
+});
+
+type SignupDraft = z.infer<typeof signupDraftSchema>;
+type PersistedSignup = z.infer<typeof persistedSignupSchema>;
+
+const SIGNUP_DRAFT_STORAGE_KEY = "tinder-lite:signup-draft";
+const SIGNUP_DRAFT_SAVE_DELAY_MS = 200;
+const SIGNUP_STEP_ORDER: SignupStep[] = [
+  SignupStep.Hook,
+  SignupStep.Basics,
+  SignupStep.People,
+  SignupStep.World,
+  SignupStep.Vibe,
+  SignupStep.Bio,
+  SignupStep.Account,
+];
+const SIGNUP_STEP_COUNT = SIGNUP_STEP_ORDER.length - 1;
+
+const INPUT_CLASS_NAME =
+  "min-h-14 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-[#fd267a] focus:ring-4 focus:ring-[#fd267a]/10 aria-invalid:border-rose-500 aria-invalid:ring-rose-500/10 disabled:cursor-wait disabled:bg-zinc-100 disabled:text-zinc-500";
 
 const GENDER_LABEL = {
   [ProfileConstantsCollection.UserGender.Female]: "Woman",
   [ProfileConstantsCollection.UserGender.Male]: "Man",
-  [ProfileConstantsCollection.UserGender.Other]: "Non-binary",
-} satisfies Record<UserGender, string>;
+} satisfies Record<SignupGender, string>;
 
 const INTEREST_LABEL = {
   [ProfileConstantsCollection.UserInterest.Female]: "Women",
@@ -116,56 +168,265 @@ const emptyDraft: SignupDraft = {
   jobTitle: "",
   movieNightStyle: "",
   name: "",
-  password: "",
   socialBattery: "",
   weekdayPace: "",
 };
 
-const getStepIndex = ({ step }: GetStepIndexInput): number => {
-  return AuthConstantsCollection.SignupStepOrder.indexOf(step);
+const getStepIndex = ({ step }: GetStepInput): number => {
+  return SIGNUP_STEP_ORDER.indexOf(step);
 };
 
-const getNextStep = ({ step }: GetStepIndexInput): SignupStep => {
-  const nextIndex = getStepIndex({ step }) + 1;
-  const nextStep = AuthConstantsCollection.SignupStepOrder[nextIndex];
+const getNextStep = ({ step }: GetStepInput): SignupStep => {
+  return SIGNUP_STEP_ORDER[getStepIndex({ step }) + 1] ?? step;
+};
 
-  if (!nextStep) {
-    return step;
+const getPreviousStep = ({ step }: GetStepInput): SignupStep => {
+  return SIGNUP_STEP_ORDER[getStepIndex({ step }) - 1] ?? step;
+};
+
+const getStepActionLabel = ({ step }: GetStepInput): string => {
+  if (step === SignupStep.Hook) {
+    return "Build my profile";
   }
 
-  return nextStep;
-};
-
-const getPreviousStep = ({ step }: GetStepIndexInput): SignupStep => {
-  const previousIndex = getStepIndex({ step }) - 1;
-  const previousStep = AuthConstantsCollection.SignupStepOrder[previousIndex];
-
-  if (!previousStep) {
-    return step;
+  if (step === SignupStep.Basics) {
+    return "Continue";
   }
 
-  return previousStep;
+  if (step === SignupStep.People) {
+    return "Set my preferences";
+  }
+
+  if (step === SignupStep.World) {
+    return "Add to my profile";
+  }
+
+  if (step === SignupStep.Vibe) {
+    return "Continue";
+  }
+
+  return "Finish my profile";
 };
 
-const SignupPreviewCard = ({ preview }: SignupPreviewCardProps) => {
+const getStepError = ({
+  draft,
+  step,
+}: {
+  draft: SignupDraft;
+  step: SignupStep;
+}): string => {
+  if (step === SignupStep.Basics && draft.name.trim().length < 2) {
+    return "Enter at least two characters for your name.";
+  }
+
+  if (
+    step === SignupStep.Basics &&
+    (!Number.isInteger(draft.age) || draft.age < 18 || draft.age > 120)
+  ) {
+    return "Enter an age between 18 and 120.";
+  }
+
+  if (step === SignupStep.People && !draft.gender) {
+    return "Choose how you want to appear on your profile.";
+  }
+
+  if (step === SignupStep.People && !draft.interestedIn.length) {
+    return "Choose at least one group you would like to meet.";
+  }
+
+  return "";
+};
+
+const readPersistedSignup = (): PersistedSignup | null => {
+  try {
+    const serializedSignup = sessionStorage.getItem(SIGNUP_DRAFT_STORAGE_KEY);
+
+    if (!serializedSignup) {
+      return null;
+    }
+
+    const parsedSignup = persistedSignupSchema.safeParse(
+      JSON.parse(serializedSignup),
+    );
+
+    return parsedSignup.success ? parsedSignup.data : null;
+  } catch {
+    // Storage can be unavailable in privacy-restricted browsers; signup still works in memory.
+    return null;
+  }
+};
+
+const ChoiceInput = ({
+  checked,
+  description,
+  label,
+  name,
+  onSelect,
+  type,
+  value,
+}: ChoiceInputProps) => {
   return (
-    <article className="mt-10 overflow-hidden rounded-[1.8rem] bg-white/10 p-5">
-      <p className="text-[0.65rem] font-bold tracking-[0.18em] text-[#ff8fb0] uppercase">
-        {preview.joining ? "Going live" : "Your card"}
+    <label
+      className={
+        checked
+          ? "group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[#fd267a] bg-[#fff0f5] px-4 py-3 text-left text-[#b81550] shadow-[0_12px_30px_-22px_rgba(253,38,122,0.8)] transition focus-within:ring-4 focus-within:ring-[#fd267a]/10"
+          : "group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-left text-zinc-700 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md focus-within:border-[#fd267a] focus-within:ring-4 focus-within:ring-[#fd267a]/10"
+      }
+    >
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold">{label}</span>
+        {description ? (
+          <span className="mt-0.5 block text-xs leading-5 text-zinc-500">
+            {description}
+          </span>
+        ) : null}
+      </span>
+      <input
+        checked={checked}
+        className="sr-only"
+        name={name}
+        onChange={onSelect}
+        type={type}
+        value={value}
+      />
+      <span
+        aria-hidden="true"
+        className={
+          checked
+            ? "flex size-5 shrink-0 items-center justify-center rounded-full bg-[#fd267a] text-white"
+            : "size-5 shrink-0 rounded-full border-2 border-zinc-300 bg-white"
+        }
+      >
+        {checked ? (
+          <svg
+            viewBox="0 0 20 20"
+            className="size-3"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2.5"
+          >
+            <path d="m5 10 3 3 7-7" />
+          </svg>
+        ) : null}
+      </span>
+    </label>
+  );
+};
+
+const StepIntro = ({
+  description,
+  eyebrow,
+  headingRef,
+  title,
+}: StepIntroProps) => {
+  return (
+    <div>
+      <p className="text-xs font-bold tracking-[0.2em] text-[#d91d60] uppercase">
+        {eyebrow}
       </p>
-      <h2 className="mt-2 text-2xl font-semibold">
-        {preview.name || "You"}, {preview.age || "—"}
-      </h2>
-      <p className="mt-1 text-sm text-white/60">
-        {preview.jobTitle || "No job listed"}
-        {preview.city ? ` · ${preview.city}` : ""}
+      <h1
+        ref={headingRef}
+        id="signup-step-heading"
+        tabIndex={-1}
+        className="mt-3 text-3xl leading-tight font-semibold tracking-[-0.045em] text-zinc-950 outline-none sm:text-4xl lg:text-5xl"
+      >
+        {title}
+      </h1>
+      <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-600 sm:text-base sm:leading-7">
+        {description}
       </p>
-      <p className="mt-4 text-sm leading-6 text-white/80">
-        {preview.joining
-          ? "Hold on — we're putting you on the floor."
-          : preview.bio || "The line goes here."}
-      </p>
-    </article>
+    </div>
+  );
+};
+
+const ProfilePreview = ({ draft }: ProfilePreviewProps) => {
+  const initial = draft.name.trim().charAt(0).toUpperCase() || "♥";
+  const detailParts = [draft.jobTitle.trim(), draft.city.trim()].filter(
+    (part) => Boolean(part),
+  );
+  const vibeLabels: string[] = [];
+
+  if (draft.weekdayPace) {
+    vibeLabels.push(
+      ProfileConstantsCollection.WeekdayPaceLabel[draft.weekdayPace],
+    );
+  }
+
+  if (draft.socialBattery) {
+    vibeLabels.push(
+      ProfileConstantsCollection.SocialBatteryLabel[draft.socialBattery],
+    );
+  }
+
+  if (draft.movieNightStyle) {
+    vibeLabels.push(
+      ProfileConstantsCollection.MovieNightStyleLabel[draft.movieNightStyle],
+    );
+  }
+
+  return (
+    <div className="w-full max-w-sm">
+      <div className="mb-4">
+        <p className="text-xs font-bold tracking-[0.18em] text-zinc-500 uppercase">
+          Live profile preview
+        </p>
+      </div>
+      <article className="relative overflow-hidden rounded-[2rem] bg-zinc-950 text-white shadow-[0_36px_90px_-32px_rgba(63,23,40,0.55)]">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(circle_at_30%_20%,#ff8fb0_0%,#fd267a_32%,#ff6036_72%,#7a183d_100%)]">
+          <div
+            aria-hidden="true"
+            className="absolute -top-12 -right-10 size-52 rounded-full border border-white/20 bg-white/10 blur-sm"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute bottom-16 -left-12 size-44 rounded-full border border-white/15 bg-zinc-950/15"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="flex size-32 items-center justify-center rounded-full border border-white/25 bg-white/15 text-6xl font-semibold shadow-2xl backdrop-blur-md">
+              {initial}
+            </span>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-zinc-950 via-zinc-950/85 to-transparent px-6 pt-28 pb-6">
+            <h2 className="text-3xl font-semibold tracking-[-0.045em]">
+              {draft.name.trim() || "Your name"}
+              {draft.age ? `, ${String(draft.age)}` : ""}
+            </h2>
+            <p className="mt-1 min-h-5 text-sm text-white/70">
+              {detailParts.length
+                ? detailParts.join(" · ")
+                : "Your details will appear here"}
+            </p>
+          </div>
+        </div>
+        <div className="space-y-4 px-6 py-5">
+          <p className="min-h-12 text-sm leading-6 text-white/80">
+            {draft.bio.trim() ||
+              "Add a short bio that gives someone an easy way to start a conversation."}
+          </p>
+          {vibeLabels.length ? (
+            <ul
+              className="flex flex-wrap gap-2"
+              aria-label="Selected profile vibes"
+            >
+              {vibeLabels.map((label) => (
+                <li
+                  key={label}
+                  className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/80"
+                >
+                  {label}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-white/45">
+              Your selected vibes will make this card feel more personal.
+            </p>
+          )}
+        </div>
+      </article>
+    </div>
   );
 };
 
@@ -176,8 +437,8 @@ const SignupMessage = ({ isError, message }: SignupMessageProps) => {
       role={isError ? "alert" : "status"}
       className={
         isError
-          ? "mt-6 rounded-xl border border-rose-300/30 bg-rose-300/10 px-4 py-3 text-sm font-medium text-rose-100"
-          : "mt-6 rounded-xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-3 text-sm font-medium text-emerald-100"
+          ? "mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800"
+          : "mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
       }
     >
       {message}
@@ -185,32 +446,53 @@ const SignupMessage = ({ isError, message }: SignupMessageProps) => {
   );
 };
 
-const SignupModeSwitch = ({
-  disabled,
-  label,
-  onSwitch,
-  prompt,
-}: SignupModeSwitchProps) => {
+const SignupSubmitButton = ({
+  disabled = false,
+  idleLabel,
+  pendingLabel,
+  resendPendingLabel,
+}: SignupSubmitButtonProps) => {
+  const { data, pending } = useFormStatus();
+  const submissionIsOtpResend = pending && data?.get("resendOtp") === "true";
+  const visiblePendingLabel =
+    submissionIsOtpResend && resendPendingLabel
+      ? resendPendingLabel
+      : pendingLabel;
+
   return (
-    <p className="text-center text-sm text-white/55">
-      {prompt}{" "}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={onSwitch}
-        className="font-semibold text-white/80 underline-offset-4 hover:text-white hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300/50 disabled:cursor-wait disabled:opacity-60"
-      >
-        {label}
-      </button>
-    </p>
+    <button
+      type="submit"
+      disabled={disabled || pending}
+      className="group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#fd267a] to-[#ff6036] px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(253,38,122,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(253,38,122,0.9)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/25 disabled:cursor-wait disabled:opacity-65 disabled:hover:translate-y-0"
+    >
+      {pending ? (
+        <>
+          <span
+            aria-hidden="true"
+            className="mr-2 size-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none"
+          />
+          {visiblePendingLabel}
+        </>
+      ) : (
+        <>
+          {idleLabel}
+          <span
+            aria-hidden="true"
+            className="ml-2 transition-transform group-hover:translate-x-1 motion-reduce:transition-none"
+          >
+            →
+          </span>
+        </>
+      )}
+    </button>
   );
 };
 
-const SignupHiddenProfileFields = ({
+const HiddenProfileFields = ({
   draft,
   mode,
   session,
-}: SignupHiddenProfileFieldsProps) => {
+}: HiddenProfileFieldsProps) => {
   return (
     <>
       <input name="signupMode" type="hidden" value={mode} />
@@ -240,66 +522,56 @@ const SignupHiddenProfileFields = ({
   );
 };
 
-const getStepHint = ({ draft, step }: GetStepHintInput): string => {
-  if (step === AuthConstantsCollection.SignupStep.Name && draft.name.trim().length < 2) {
-    return "Give us at least two letters.";
-  }
-
-  if (step === AuthConstantsCollection.SignupStep.Age && draft.age < 18) {
-    return "You have to be 18.";
-  }
-
-  if (step === AuthConstantsCollection.SignupStep.People && !draft.gender) {
-    return "Pick how you show up.";
-  }
-
-  if (
-    step === AuthConstantsCollection.SignupStep.People &&
-    !draft.interestedIn.length
-  ) {
-    return "Pick who you want to meet.";
-  }
-
-  if (step === AuthConstantsCollection.SignupStep.World && !draft.city.trim()) {
-    return "Drop a city so people know the scene.";
-  }
-
-  if (
-    step === AuthConstantsCollection.SignupStep.Vibe &&
-    (!draft.weekdayPace || !draft.socialBattery || !draft.movieNightStyle)
-  ) {
-    return "Hit all three. It takes ten seconds.";
-  }
-
-  if (step === AuthConstantsCollection.SignupStep.Bio && !draft.bio.trim()) {
-    return "One line. Even a messy one.";
-  }
-
-  return "";
+const OptionalStepActions = ({
+  children,
+  onSkip,
+}: {
+  children: ReactNode;
+  onSkip: () => void;
+}) => {
+  return (
+    <div className="space-y-3">
+      {children}
+      <button
+        type="button"
+        onClick={onSkip}
+        className="min-h-11 w-full rounded-xl px-4 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-200"
+      >
+        Skip for now
+      </button>
+    </div>
+  );
 };
 
 export const SignupFlow = () => {
-  const [step, setStep] = useState<SignupStep>(
-    AuthConstantsCollection.SignupStep.Hook,
-  );
+  const router = useRouter();
+  const [step, setStep] = useState<SignupStep>(SignupStep.Hook);
+  const [resumeStep, setResumeStep] = useState<SignupStep | null>(null);
   const [draft, setDraft] = useState<SignupDraft>(emptyDraft);
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [hint, setHint] = useState("");
   const [mode, setMode] = useState<SignupMode>(
     SignupConstantsCollection.SignupMode.Otp,
   );
   const [signupSession, setSignupSession] = useState(0);
+  const [draftPersistenceEnabled, setDraftPersistenceEnabled] = useState(false);
+  const [storageReady, setStorageReady] = useState(false);
+  const [dismissedResponseId, setDismissedResponseId] = useState<number | null>(
+    null,
+  );
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const otpInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
   const [state, formAction, pending] = useActionState(
     signupAction,
     initialSignupActionState,
   );
 
-  if (state.success) {
-    redirect("/feed");
-  }
-
   const stepIndex = getStepIndex({ step });
-  const isAccountStep =
-    step === AuthConstantsCollection.SignupStep.Account;
+  const isAccountStep = step === SignupStep.Account;
   const isCurrentActionState =
     state.mode === mode && state.session === signupSession;
   const isOtpCodeStep =
@@ -309,36 +581,173 @@ export const SignupFlow = () => {
     state.step === SignupConstantsCollection.OtpSignupStep.Code;
   const isPending = isAccountStep && pending;
   const visibleActionMessage =
+    state.responseId !== dismissedResponseId &&
     isCurrentActionState &&
     (isOtpCodeStep || state.email === draft.email.trim())
       ? state.message
       : "";
-  const preview: SignupCardPreview = {
-    age: draft.age,
-    bio: draft.bio,
-    city: draft.city,
-    jobTitle: draft.jobTitle,
-    joining:
-      isPending &&
-      (isOtpCodeStep ||
-        mode === SignupConstantsCollection.SignupMode.Password),
-    name: draft.name,
+  const transitionKey = `${step}:${isOtpCodeStep ? "code" : "default"}`;
+  const optionalStep =
+    step === SignupStep.World ||
+    step === SignupStep.Vibe ||
+    step === SignupStep.Bio;
+
+  useEffect(() => {
+    const restoreTimer = window.setTimeout(() => {
+      const persistedSignup = readPersistedSignup();
+
+      if (persistedSignup) {
+        setDraft(persistedSignup.draft);
+        setDraftPersistenceEnabled(true);
+
+        if (persistedSignup.step !== SignupStep.Hook) {
+          setResumeStep(persistedSignup.step);
+        }
+      }
+
+      setStorageReady(true);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(restoreTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!draftPersistenceEnabled || !storageReady || state.success) {
+      return;
+    }
+
+    const saveTimer = window.setTimeout(() => {
+      try {
+        sessionStorage.setItem(
+          SIGNUP_DRAFT_STORAGE_KEY,
+          JSON.stringify({
+            draft,
+            step: step === SignupStep.Hook && resumeStep ? resumeStep : step,
+          }),
+        );
+      } catch {
+        // A blocked or full storage area must not prevent account creation.
+      }
+    }, SIGNUP_DRAFT_SAVE_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(saveTimer);
+    };
+  }, [
+    draft,
+    draftPersistenceEnabled,
+    resumeStep,
+    state.success,
+    step,
+    storageReady,
+  ]);
+
+  useEffect(() => {
+    if (!storageReady) {
+      return;
+    }
+
+    headingRef.current?.focus();
+  }, [step, storageReady]);
+
+  useEffect(() => {
+    if (state.field === SignupConstantsCollection.SignupActionField.Email) {
+      emailInputRef.current?.focus();
+      return;
+    }
+
+    if (state.field === SignupConstantsCollection.SignupActionField.Otp) {
+      otpInputRef.current?.focus();
+      return;
+    }
+
+    if (state.field === SignupConstantsCollection.SignupActionField.Password) {
+      passwordInputRef.current?.focus();
+      return;
+    }
+
+    if (
+      !state.isError &&
+      state.step === SignupConstantsCollection.OtpSignupStep.Code
+    ) {
+      otpInputRef.current?.focus();
+    }
+  }, [state.field, state.isError, state.responseId, state.step]);
+
+  useEffect(() => {
+    if (!state.success) {
+      return;
+    }
+
+    try {
+      sessionStorage.removeItem(SIGNUP_DRAFT_STORAGE_KEY);
+    } catch {
+      // Redirect even if privacy settings prevent storage cleanup.
+    }
+
+    router.replace("/feed");
+  }, [router, state.success]);
+
+  const clearLocalFeedback = () => {
+    setHint("");
+    setDismissedResponseId(state.responseId);
+  };
+
+  const discardSavedDraft = () => {
+    setDraftPersistenceEnabled(false);
+
+    try {
+      sessionStorage.removeItem(SIGNUP_DRAFT_STORAGE_KEY);
+    } catch {
+      // Reset the in-memory draft even when browser storage is unavailable.
+    }
+
+    setDraft(emptyDraft);
+    setResumeStep(null);
+    setStep(SignupStep.Hook);
+    setPassword("");
+    setOtp("");
+    setPasswordVisible(false);
+    setHint("");
+    setMode(SignupConstantsCollection.SignupMode.Otp);
+    setDismissedResponseId(state.responseId);
+    setSignupSession((currentSession) => currentSession + 1);
   };
 
   const goNext = () => {
-    const nextHint = getStepHint({ draft, step });
+    if (step === SignupStep.Hook && resumeStep) {
+      setStep(resumeStep);
+      setResumeStep(null);
+      return;
+    }
 
-    if (nextHint) {
-      setHint(nextHint);
+    const stepError = getStepError({ draft, step });
+
+    if (stepError) {
+      setHint(stepError);
       return;
     }
 
     setHint("");
+
+    if (step === SignupStep.Hook) {
+      setDraftPersistenceEnabled(true);
+    }
+
     setStep(getNextStep({ step }));
   };
 
   const goBack = () => {
     setHint("");
+    setDismissedResponseId(state.responseId);
+
+    if (isOtpCodeStep) {
+      setOtp("");
+      setSignupSession((currentSession) => currentSession + 1);
+      return;
+    }
 
     if (isAccountStep) {
       setSignupSession((currentSession) => currentSession + 1);
@@ -347,24 +756,53 @@ export const SignupFlow = () => {
     setStep(getPreviousStep({ step }));
   };
 
-  const showOtpSignup = () => {
+  const skipOptionalStep = () => {
     setHint("");
+    setStep(getNextStep({ step }));
+  };
+
+  const showOtpSignup = () => {
     setMode(SignupConstantsCollection.SignupMode.Otp);
+    setOtp("");
+    setHint("");
+    setDismissedResponseId(state.responseId);
     setSignupSession((currentSession) => currentSession + 1);
   };
 
   const showPasswordSignup = () => {
-    setHint("");
     setMode(SignupConstantsCollection.SignupMode.Password);
+    setHint("");
+    setDismissedResponseId(state.responseId);
     setSignupSession((currentSession) => currentSession + 1);
   };
 
   const changeOtpEmail = () => {
-    setDraft((current) => ({
-      ...current,
+    setDraft((currentDraft) => ({
+      ...currentDraft,
       email: state.email,
     }));
+    setOtp("");
+    setDismissedResponseId(state.responseId);
     setSignupSession((currentSession) => currentSession + 1);
+  };
+
+  const toggleInterest = ({ interest }: ToggleInterestInput) => {
+    clearLocalFeedback();
+    setDraft((currentDraft) => {
+      if (currentDraft.interestedIn.includes(interest)) {
+        return {
+          ...currentDraft,
+          interestedIn: currentDraft.interestedIn.filter(
+            (value) => value !== interest,
+          ),
+        };
+      }
+
+      return {
+        ...currentDraft,
+        interestedIn: [...currentDraft.interestedIn, interest],
+      };
+    });
   };
 
   const handleSignupSubmit = ({ event }: HandleSignupSubmitInput) => {
@@ -376,595 +814,860 @@ export const SignupFlow = () => {
     goNext();
   };
 
-  const toggleInterest = ({ interest }: ToggleInterestInput) => {
-    setDraft((current) => {
-      if (current.interestedIn.includes(interest)) {
-        return {
-          ...current,
-          interestedIn: current.interestedIn.filter(
-            (value) => value !== interest,
-          ),
-        };
-      }
-
-      return {
-        ...current,
-        interestedIn: [...current.interestedIn, interest],
-      };
-    });
-  };
+  const passwordRequirements = [
+    {
+      label: "8–32 characters",
+      met: password.length >= 8 && password.length <= 32,
+    },
+    { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+    { label: "One lowercase letter", met: /[a-z]/.test(password) },
+    { label: "One number", met: /\d/.test(password) },
+    { label: "One symbol", met: /[^A-Za-z0-9]/.test(password) },
+  ];
 
   return (
     <form
       action={formAction}
-      aria-busy={isPending}
+      aria-busy={isPending || state.success}
       onSubmit={(event) => handleSignupSubmit({ event })}
-      className="relative flex min-h-svh flex-col overflow-hidden bg-zinc-950 text-white"
+      className="relative isolate min-h-svh overflow-x-hidden bg-[#fff8f6] text-zinc-950"
     >
-      <SignupHiddenProfileFields
-        draft={draft}
-        mode={mode}
-        session={signupSession}
+      <HiddenProfileFields draft={draft} mode={mode} session={signupSession} />
+
+      <div
+        aria-hidden="true"
+        className={`${styles.ambientOrb} absolute -top-40 -left-40 size-[28rem] rounded-full bg-[#fd267a]/15 blur-3xl`}
       />
       <div
         aria-hidden="true"
-        className="absolute -top-32 left-[-8rem] size-[28rem] rounded-full bg-[#fd267a]/30 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute right-[-10rem] bottom-[-8rem] size-[32rem] rounded-full bg-[#ff6036]/25 blur-3xl"
+        className={`${styles.ambientOrbDelayed} absolute right-[-12rem] bottom-[-12rem] size-[34rem] rounded-full bg-[#ff6036]/15 blur-3xl`}
       />
 
-      <header className="relative z-10 flex items-center justify-between px-5 py-5 sm:px-8">
-        <Link href="/login" className="text-sm font-semibold text-white/70">
+      <header className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
+        <Link
+          href="/login"
+          className="flex min-h-11 items-center gap-2.5 rounded-xl pr-3 font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/20"
+        >
+          <span
+            aria-hidden="true"
+            className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#fd267a] to-[#ff6036] text-sm text-white shadow-lg shadow-[#fd267a]/20"
+          >
+            ♥
+          </span>
           Tinder Lite
         </Link>
-        {step === AuthConstantsCollection.SignupStep.Hook ? (
-          <Link href="/login" className="text-sm font-semibold text-white/70">
+
+        {step === SignupStep.Hook ? (
+          <Link
+            href="/login"
+            className="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/15"
+          >
             Log in
           </Link>
         ) : (
           <button
             type="button"
-            disabled={isPending}
+            disabled={isPending || state.success}
             onClick={goBack}
-            className="rounded-sm text-sm font-semibold text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300/50 disabled:cursor-wait disabled:opacity-50"
+            className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/15 disabled:cursor-wait disabled:opacity-50"
           >
+            <span aria-hidden="true">←</span>
             Back
           </button>
         )}
       </header>
 
-      {step === AuthConstantsCollection.SignupStep.Hook ? null : (
-        <div className="relative z-10 flex gap-1.5 px-5 sm:px-8">
-          {AuthConstantsCollection.SignupStepOrder.filter(
-            (item) => item !== AuthConstantsCollection.SignupStep.Hook,
-          ).map((item) => (
-            <span
-              key={item}
-              className={
-                getStepIndex({ step: item }) <= stepIndex
-                  ? "h-1 flex-1 rounded-full bg-white"
-                  : "h-1 flex-1 rounded-full bg-white/20"
-              }
+      {step === SignupStep.Hook ? null : (
+        <div className="relative z-20 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12">
+          <div
+            aria-hidden="true"
+            className="flex items-center justify-between text-xs font-semibold text-zinc-500"
+          >
+            <span>Signup progress</span>
+            <span>
+              Step {String(stepIndex)} of {String(SIGNUP_STEP_COUNT)}
+            </span>
+          </div>
+          <div
+            role="progressbar"
+            aria-label="Signup progress"
+            aria-valuemax={SIGNUP_STEP_COUNT}
+            aria-valuemin={0}
+            aria-valuenow={stepIndex}
+            aria-valuetext={`Step ${String(stepIndex)} of ${String(SIGNUP_STEP_COUNT)}`}
+            className="pointer-events-none mt-2 h-0.5 w-full overflow-hidden bg-zinc-300"
+          >
+            <div
+              aria-hidden="true"
+              className="h-full bg-[#d91d60] transition-[width] duration-300 motion-reduce:transition-none"
+              style={{
+                width: `${String((stepIndex / SIGNUP_STEP_COUNT) * 100)}%`,
+              }}
             />
-          ))}
+          </div>
         </div>
       )}
 
-      <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-5 py-10 sm:px-8">
-        {step === AuthConstantsCollection.SignupStep.Hook ? (
-          <div>
-            <p className="text-sm font-bold tracking-[0.22em] text-[#ff8fb0] uppercase">
-              Not another waiting room
-            </p>
-            <h1 className="mt-4 text-5xl leading-[0.95] font-semibold tracking-[-0.06em] sm:text-7xl">
-              Dating apps got sleepy.
-              <span className="mt-2 block bg-gradient-to-r from-[#fd267a] to-[#ff6036] bg-clip-text text-transparent">
-                You didn&apos;t.
-              </span>
-            </h1>
-            <p className="mt-6 max-w-md text-lg leading-8 text-white/70">
-              90 seconds. No essay. A card that actually sounds like you.
-            </p>
-          </div>
-        ) : null}
-
-        {step === AuthConstantsCollection.SignupStep.Name ? (
-          <div>
-            <p className="text-sm font-bold tracking-[0.18em] text-[#ff8fb0] uppercase">
-              First impression
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              What should people call you?
-            </h1>
-            <input
-              aria-label="Name"
-              autoFocus
-              value={draft.name}
-              maxLength={ProfileConstantsCollection.FieldLimit.Name}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  name: event.target.value,
-                }))
-              }
-              placeholder="Your name"
-              className={`${HUGE_INPUT_CLASS_NAME} mt-10`}
-            />
-          </div>
-        ) : null}
-
-        {step === AuthConstantsCollection.SignupStep.Age ? (
-          <div>
-            <p className="text-sm font-bold tracking-[0.18em] text-[#ff8fb0] uppercase">
-              No fake 21s
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              How old are you, for real?
-            </h1>
-            <div className="mt-10 flex flex-wrap gap-2">
-              {AuthConstantsCollection.AgePicks.map((age) => (
-                <SignupChoice
-                  key={age}
-                  label={`${age}`}
-                  selected={draft.age === age}
-                  onSelect={() =>
-                    setDraft((current) => ({
-                      ...current,
-                      age,
-                    }))
-                  }
+      <main className="relative z-10 mx-auto grid min-h-[calc(100svh-7.5rem)] w-full max-w-7xl gap-12 px-5 py-8 sm:px-8 sm:py-10 lg:min-h-[calc(100svh-9rem)] lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center lg:px-12 lg:py-12 xl:gap-20">
+        <section
+          aria-labelledby="signup-step-heading"
+          className="mx-auto flex w-full max-w-2xl flex-col"
+        >
+          <div key={transitionKey} className={styles.stage}>
+            {step === SignupStep.Hook ? (
+              <div>
+                <StepIntro
+                  headingRef={headingRef}
+                  eyebrow="A profile worth opening"
+                  title="Meet people who match your pace."
+                  description="A few thoughtful choices create a profile that feels like you. You can finish in your own time, and optional details can always wait."
                 />
-              ))}
-            </div>
-            <input
-              aria-label="Age"
-              type="number"
-              min={18}
-              value={draft.age > 0 ? draft.age : ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  age: Number.parseInt(event.target.value, 10) || 0,
-                }))
-              }
-              placeholder="Or type it"
-              className={`${FIELD_INPUT_CLASS_NAME} mt-6 max-w-xs`}
-            />
-          </div>
-        ) : null}
-
-        {step === AuthConstantsCollection.SignupStep.People ? (
-          <div>
-            <p className="text-sm font-bold tracking-[0.18em] text-[#ff8fb0] uppercase">
-              The lineup
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              How do you show up?
-            </h1>
-            <div className="mt-8 flex flex-wrap gap-2">
-              {Object.values(ProfileConstantsCollection.UserGender).map(
-                (gender) => (
-                  <SignupChoice
-                    key={gender}
-                    label={GENDER_LABEL[gender]}
-                    selected={draft.gender === gender}
-                    onSelect={() =>
-                      setDraft((current) => ({
-                        ...current,
-                        gender,
-                      }))
-                    }
-                  />
-                ),
-              )}
-            </div>
-            <h2 className="mt-10 text-2xl font-semibold tracking-[-0.04em]">
-              Who are you looking for?
-            </h2>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {Object.values(ProfileConstantsCollection.UserInterest).map(
-                (interest) => (
-                  <SignupChoice
-                    key={interest}
-                    label={INTEREST_LABEL[interest]}
-                    selected={draft.interestedIn.includes(interest)}
-                    onSelect={() => toggleInterest({ interest })}
-                  />
-                ),
-              )}
-            </div>
-          </div>
-        ) : null}
-
-        {step === AuthConstantsCollection.SignupStep.World ? (
-          <div>
-            <p className="text-sm font-bold tracking-[0.18em] text-[#ff8fb0] uppercase">
-              Home base
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              Where should someone find you?
-            </h1>
-            <input
-              aria-label="City"
-              autoFocus
-              value={draft.city}
-              maxLength={ProfileConstantsCollection.FieldLimit.City}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  city: event.target.value,
-                }))
-              }
-              placeholder="City"
-              className={`${HUGE_INPUT_CLASS_NAME} mt-10`}
-            />
-            <input
-              aria-label="Job title"
-              value={draft.jobTitle}
-              maxLength={ProfileConstantsCollection.FieldLimit.JobTitle}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  jobTitle: event.target.value,
-                }))
-              }
-              placeholder="Job, if you have one"
-              className={`${FIELD_INPUT_CLASS_NAME} mt-6`}
-            />
-          </div>
-        ) : null}
-
-        {step === AuthConstantsCollection.SignupStep.Vibe ? (
-          <div>
-            <p className="text-sm font-bold tracking-[0.18em] text-[#ff8fb0] uppercase">
-              Energy check
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              Pick the vibe. No wrong answers.
-            </h1>
-            <p className="mt-8 text-sm font-semibold text-white/60">Weekdays</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {Object.entries(ProfileConstantsCollection.WeekdayPaceLabel).map(
-                ([value, label]) => (
-                  <SignupChoice
-                    key={value}
-                    label={label}
-                    selected={draft.weekdayPace === value}
-                    onSelect={() =>
-                      setDraft((current) => ({
-                        ...current,
-                        weekdayPace: value,
-                      }))
-                    }
-                  />
-                ),
-              )}
-            </div>
-            <p className="mt-8 text-sm font-semibold text-white/60">People</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {Object.entries(
-                ProfileConstantsCollection.SocialBatteryLabel,
-              ).map(([value, label]) => (
-                <SignupChoice
-                  key={value}
-                  label={label}
-                  selected={draft.socialBattery === value}
-                  onSelect={() =>
-                    setDraft((current) => ({
-                      ...current,
-                      socialBattery: value,
-                    }))
-                  }
-                />
-              ))}
-            </div>
-            <p className="mt-8 text-sm font-semibold text-white/60">
-              Movie night
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {Object.entries(
-                ProfileConstantsCollection.MovieNightStyleLabel,
-              ).map(([value, label]) => (
-                <SignupChoice
-                  key={value}
-                  label={label}
-                  selected={draft.movieNightStyle === value}
-                  onSelect={() =>
-                    setDraft((current) => ({
-                      ...current,
-                      movieNightStyle: value,
-                    }))
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {step === AuthConstantsCollection.SignupStep.Bio ? (
-          <div>
-            <p className="text-sm font-bold tracking-[0.18em] text-[#ff8fb0] uppercase">
-              The line
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              One sentence they&apos;ll actually read.
-            </h1>
-            <textarea
-              aria-label="Bio"
-              autoFocus
-              value={draft.bio}
-              maxLength={140}
-              rows={3}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  bio: event.target.value,
-                }))
-              }
-              placeholder="Weekends, chaos, filter coffee…"
-              className="mt-10 w-full resize-none bg-transparent text-2xl leading-snug font-semibold tracking-[-0.04em] text-white outline-none placeholder:text-white/25 sm:text-4xl"
-            />
-            <SignupPreviewCard preview={preview} />
-          </div>
-        ) : null}
-
-        {step === AuthConstantsCollection.SignupStep.Account ? (
-          <div>
-            <p className="text-sm font-bold tracking-[0.18em] text-[#ff8fb0] uppercase">
-              {isOtpCodeStep ? "Check your inbox" : "Lock it in"}
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              {isOtpCodeStep
-                ? "Six digits. Then you're in."
-                : mode === SignupConstantsCollection.SignupMode.Otp
-                  ? "No password needed."
-                  : "Create a password."}
-            </h1>
-            <fieldset disabled={isPending} className="mt-10 space-y-4">
-              {mode === SignupConstantsCollection.SignupMode.Otp ? (
-                isOtpCodeStep ? (
-                  <>
-                    <input name="email" type="hidden" value={state.email} />
-                    <p
-                      id="signup-otp-destination"
-                      className="text-sm leading-6 text-white/65"
+                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  {[
+                    ["01", "Tell us the basics"],
+                    ["02", "Choose your vibe"],
+                    ["03", "Start matching"],
+                  ].map(([number, label]) => (
+                    <div
+                      key={number}
+                      className="rounded-2xl border border-white bg-white/75 p-4 shadow-sm backdrop-blur-sm"
                     >
-                      We sent a 6-digit code to{" "}
-                      <strong className="font-semibold text-white/90">
-                        {state.email}
-                      </strong>
-                      {"."}
-                    </p>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="signup-otp"
-                        className="block text-sm font-semibold text-white/85"
-                      >
-                        Verification code
-                      </label>
-                      <input
-                        id="signup-otp"
-                        name="otp"
-                        type="text"
-                        autoComplete="one-time-code"
-                        autoFocus
-                        inputMode="numeric"
-                        maxLength={6}
-                        minLength={6}
-                        pattern="[0-9]{6}"
-                        placeholder="000000"
-                        required
-                        aria-describedby="signup-otp-destination signup-message"
-                        aria-invalid={state.isError}
-                        className={`${FIELD_INPUT_CLASS_NAME} text-center text-xl tracking-[0.4em]`}
-                      />
+                      <span className="text-xs font-bold text-[#d91d60]">
+                        {number}
+                      </span>
+                      <p className="mt-2 text-sm font-semibold text-zinc-800">
+                        {label}
+                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={changeOtpEmail}
-                      className="min-h-10 w-full rounded-xl text-sm font-semibold text-white/65 underline-offset-4 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300/50 disabled:cursor-wait disabled:opacity-60"
-                    >
-                      Change email
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="signup-otp-email"
-                        className="block text-sm font-semibold text-white/85"
-                      >
-                        Email
-                      </label>
-                      <input
-                        id="signup-otp-email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        inputMode="email"
-                        maxLength={254}
-                        required
-                        value={draft.email}
-                        onChange={(event) =>
-                          setDraft((current) => ({
-                            ...current,
-                            email: event.target.value,
-                          }))
-                        }
-                        placeholder="you@example.com"
-                        aria-describedby={
-                          visibleActionMessage ? "signup-message" : undefined
-                        }
-                        aria-invalid={Boolean(visibleActionMessage)}
-                        className={FIELD_INPUT_CLASS_NAME}
-                      />
-                    </div>
-                    <p className="text-xs leading-5 text-white/50">
-                      We&apos;ll email you one 6-digit code to create and secure
-                      your account.
-                    </p>
-                  </>
-                )
-              ) : (
-                <>
-                  <div className="space-y-2">
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {step === SignupStep.Basics ? (
+              <div>
+                <StepIntro
+                  headingRef={headingRef}
+                  eyebrow="The essentials"
+                  title="Let’s start with you."
+                  description="Use the name and age you want people to see on your profile."
+                />
+                <div className="mt-8 grid gap-5 sm:grid-cols-[minmax(0,1fr)_10rem]">
+                  <div>
                     <label
-                      htmlFor="signup-password-email"
-                      className="block text-sm font-semibold text-white/85"
+                      htmlFor="signup-name"
+                      className="mb-2 block text-sm font-semibold text-zinc-800"
                     >
-                      Email
+                      First name
                     </label>
                     <input
-                      id="signup-password-email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      inputMode="email"
-                      maxLength={254}
-                      required
-                      value={draft.email}
-                      onChange={(event) =>
-                        setDraft((current) => ({
-                          ...current,
-                          email: event.target.value,
-                        }))
-                      }
-                      placeholder="you@example.com"
-                      aria-describedby={
-                        visibleActionMessage ? "signup-message" : undefined
-                      }
-                      aria-invalid={Boolean(visibleActionMessage)}
-                      className={FIELD_INPUT_CLASS_NAME}
+                      id="signup-name"
+                      autoComplete="name"
+                      value={draft.name}
+                      maxLength={ProfileConstantsCollection.FieldLimit.Name}
+                      onChange={(event) => {
+                        clearLocalFeedback();
+                        setDraft((currentDraft) => ({
+                          ...currentDraft,
+                          name: event.target.value,
+                        }));
+                      }}
+                      placeholder="Your name"
+                      aria-describedby={hint ? "signup-message" : undefined}
+                      aria-invalid={Boolean(
+                        hint && draft.name.trim().length < 2,
+                      )}
+                      className={INPUT_CLASS_NAME}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div>
                     <label
-                      htmlFor="signup-password"
-                      className="block text-sm font-semibold text-white/85"
+                      htmlFor="signup-age"
+                      className="mb-2 block text-sm font-semibold text-zinc-800"
                     >
-                      Password
+                      Age
                     </label>
                     <input
-                      id="signup-password"
-                      name="password"
-                      type="password"
-                      autoComplete="new-password"
-                      maxLength={32}
-                      minLength={8}
-                      required
-                      value={draft.password}
-                      onChange={(event) =>
-                        setDraft((current) => ({
-                          ...current,
-                          password: event.target.value,
-                        }))
-                      }
-                      placeholder="Create a password"
-                      aria-describedby={
-                        visibleActionMessage
-                          ? "signup-password-help signup-message"
-                          : "signup-password-help"
-                      }
-                      aria-invalid={Boolean(visibleActionMessage)}
-                      className={FIELD_INPUT_CLASS_NAME}
+                      id="signup-age"
+                      type="number"
+                      inputMode="numeric"
+                      min={18}
+                      max={120}
+                      step={1}
+                      value={draft.age || ""}
+                      onChange={(event) => {
+                        const nextAge = Number.parseInt(event.target.value, 10);
+                        clearLocalFeedback();
+                        setDraft((currentDraft) => ({
+                          ...currentDraft,
+                          age: Number.isNaN(nextAge) ? 0 : nextAge,
+                        }));
+                      }}
+                      placeholder="18+"
+                      aria-describedby={hint ? "signup-message" : undefined}
+                      aria-invalid={Boolean(
+                        hint &&
+                        (draft.age < 18 ||
+                          draft.age > 120 ||
+                          !Number.isInteger(draft.age)),
+                      )}
+                      className={INPUT_CLASS_NAME}
                     />
                   </div>
-                  <p
-                    id="signup-password-help"
-                    className="text-xs leading-5 text-white/50"
+                </div>
+                <p className="mt-3 text-xs leading-5 text-zinc-500">
+                  Tinder Lite is for adults aged 18 and over.
+                </p>
+              </div>
+            ) : null}
+
+            {step === SignupStep.People ? (
+              <div>
+                <StepIntro
+                  headingRef={headingRef}
+                  eyebrow="Your preferences"
+                  title="Who would you like to meet?"
+                  description="These choices shape what you see. You can update them from your profile later."
+                />
+                <div className="mt-8 space-y-8">
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-zinc-800">
+                      I am a
+                    </legend>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {SIGNUP_GENDER_OPTIONS.map((gender) => (
+                        <ChoiceInput
+                          key={gender}
+                          checked={draft.gender === gender}
+                          label={GENDER_LABEL[gender]}
+                          name="signup-gender-choice"
+                          onSelect={() => {
+                            clearLocalFeedback();
+                            setDraft((currentDraft) => ({
+                              ...currentDraft,
+                              gender,
+                            }));
+                          }}
+                          type="radio"
+                          value={gender}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-zinc-800">
+                      I’m interested in
+                    </legend>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Choose one or both.
+                    </p>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {Object.values(
+                        ProfileConstantsCollection.UserInterest,
+                      ).map((interest) => (
+                        <ChoiceInput
+                          key={interest}
+                          checked={draft.interestedIn.includes(interest)}
+                          label={INTEREST_LABEL[interest]}
+                          name="signup-interest-choice"
+                          onSelect={() => toggleInterest({ interest })}
+                          type="checkbox"
+                          value={interest}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
+            ) : null}
+
+            {step === SignupStep.World ? (
+              <div>
+                <StepIntro
+                  headingRef={headingRef}
+                  eyebrow="A little context · Optional"
+                  title="Where does life happen for you?"
+                  description="A city and job can make introductions feel more natural, but neither is required."
+                />
+                <div className="mt-8 grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="signup-city"
+                      className="mb-2 block text-sm font-semibold text-zinc-800"
+                    >
+                      City
+                    </label>
+                    <input
+                      id="signup-city"
+                      autoComplete="address-level2"
+                      value={draft.city}
+                      maxLength={ProfileConstantsCollection.FieldLimit.City}
+                      onChange={(event) => {
+                        clearLocalFeedback();
+                        setDraft((currentDraft) => ({
+                          ...currentDraft,
+                          city: event.target.value,
+                        }));
+                      }}
+                      placeholder="Mumbai"
+                      className={INPUT_CLASS_NAME}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="signup-job-title"
+                      className="mb-2 block text-sm font-semibold text-zinc-800"
+                    >
+                      Job title
+                    </label>
+                    <input
+                      id="signup-job-title"
+                      autoComplete="organization-title"
+                      value={draft.jobTitle}
+                      maxLength={ProfileConstantsCollection.FieldLimit.JobTitle}
+                      onChange={(event) => {
+                        clearLocalFeedback();
+                        setDraft((currentDraft) => ({
+                          ...currentDraft,
+                          jobTitle: event.target.value,
+                        }));
+                      }}
+                      placeholder="Product designer"
+                      className={INPUT_CLASS_NAME}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {step === SignupStep.Vibe ? (
+              <div>
+                <StepIntro
+                  headingRef={headingRef}
+                  eyebrow="More about you · Optional"
+                  title="Choose what sounds most like you."
+                  description="Choose the closest answer in each section. You can leave any section blank and change these later."
+                />
+                <div className="mt-8 space-y-7">
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-zinc-800">
+                      Which comes closest to your usual weekday?
+                    </legend>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {Object.values(
+                        ProfileConstantsCollection.WeekdayPace,
+                      ).map((value) => (
+                        <ChoiceInput
+                          key={value}
+                          checked={draft.weekdayPace === value}
+                          label={
+                            ProfileConstantsCollection.WeekdayPaceLabel[value]
+                          }
+                          name="signup-weekday-pace"
+                          onSelect={() => {
+                            clearLocalFeedback();
+                            setDraft((currentDraft) => ({
+                              ...currentDraft,
+                              weekdayPace: value,
+                            }));
+                          }}
+                          type="radio"
+                          value={value}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-zinc-800">
+                      Which kind of plan sounds best to you?
+                    </legend>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {Object.values(
+                        ProfileConstantsCollection.SocialBattery,
+                      ).map((value) => (
+                        <ChoiceInput
+                          key={value}
+                          checked={draft.socialBattery === value}
+                          label={
+                            ProfileConstantsCollection.SocialBatteryLabel[value]
+                          }
+                          name="signup-social-battery"
+                          onSelect={() => {
+                            clearLocalFeedback();
+                            setDraft((currentDraft) => ({
+                              ...currentDraft,
+                              socialBattery: value,
+                            }));
+                          }}
+                          type="radio"
+                          value={value}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-zinc-800">
+                      Which movie night sounds best to you?
+                    </legend>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {Object.values(
+                        ProfileConstantsCollection.MovieNightStyle,
+                      ).map((value) => (
+                        <ChoiceInput
+                          key={value}
+                          checked={draft.movieNightStyle === value}
+                          label={
+                            ProfileConstantsCollection.MovieNightStyleLabel[
+                              value
+                            ]
+                          }
+                          name="signup-movie-night"
+                          onSelect={() => {
+                            clearLocalFeedback();
+                            setDraft((currentDraft) => ({
+                              ...currentDraft,
+                              movieNightStyle: value,
+                            }));
+                          }}
+                          type="radio"
+                          value={value}
+                        />
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
+            ) : null}
+
+            {step === SignupStep.Bio ? (
+              <div>
+                <StepIntro
+                  headingRef={headingRef}
+                  eyebrow="Your introduction · Optional"
+                  title="Give them an easy opening line."
+                  description="A few honest details are better than a perfect paragraph."
+                />
+                <div className="mt-8">
+                  <div className="flex items-center justify-between gap-4">
+                    <label
+                      htmlFor="signup-bio"
+                      className="text-sm font-semibold text-zinc-800"
+                    >
+                      About me
+                    </label>
+                    <span
+                      id="signup-bio-count"
+                      className="text-xs tabular-nums text-zinc-500"
+                    >
+                      {String(draft.bio.length)}/
+                      {String(ProfileConstantsCollection.FieldLimit.Bio)}
+                    </span>
+                  </div>
+                  <textarea
+                    id="signup-bio"
+                    value={draft.bio}
+                    maxLength={ProfileConstantsCollection.FieldLimit.Bio}
+                    rows={5}
+                    onChange={(event) => {
+                      clearLocalFeedback();
+                      setDraft((currentDraft) => ({
+                        ...currentDraft,
+                        bio: event.target.value,
+                      }));
+                    }}
+                    placeholder="A great weekend, what you’re learning, or the thing your friends always ask you about…"
+                    aria-describedby="signup-bio-count"
+                    className={`${INPUT_CLASS_NAME} mt-2 min-h-36 resize-none overflow-y-auto leading-6`}
+                  />
+                </div>
+                <div className="mt-8 lg:hidden">
+                  <ProfilePreview draft={draft} />
+                </div>
+              </div>
+            ) : null}
+
+            {step === SignupStep.Account ? (
+              <div>
+                <StepIntro
+                  headingRef={headingRef}
+                  eyebrow={
+                    isOtpCodeStep ? "Check your inbox" : "Secure your profile"
+                  }
+                  title={
+                    isOtpCodeStep
+                      ? "Enter your six-digit code."
+                      : mode === SignupConstantsCollection.SignupMode.Otp
+                        ? "Join without a password."
+                        : "Create a password."
+                  }
+                  description={
+                    isOtpCodeStep
+                      ? `We sent a code to ${state.email}. It expires after 10 minutes.`
+                      : mode === SignupConstantsCollection.SignupMode.Otp
+                        ? "We’ll email you a one-time code. No password to remember."
+                        : "Use a strong password that you do not reuse anywhere else."
+                  }
+                />
+
+                <fieldset
+                  disabled={isPending || state.success}
+                  className="mt-8"
+                >
+                  {mode === SignupConstantsCollection.SignupMode.Otp ? (
+                    isOtpCodeStep ? (
+                      <div>
+                        <input name="email" type="hidden" value={state.email} />
+                        <label
+                          htmlFor="signup-otp"
+                          className="mb-2 block text-sm font-semibold text-zinc-800"
+                        >
+                          Verification code
+                        </label>
+                        <input
+                          ref={otpInputRef}
+                          id="signup-otp"
+                          name="otp"
+                          type="text"
+                          autoComplete="one-time-code"
+                          inputMode="numeric"
+                          maxLength={6}
+                          minLength={6}
+                          pattern="[0-9]{6}"
+                          value={otp}
+                          onChange={(event) => {
+                            setOtp(
+                              event.target.value
+                                .replace(/\D/gu, "")
+                                .slice(0, 6),
+                            );
+                            setDismissedResponseId(state.responseId);
+                          }}
+                          placeholder="000000"
+                          required
+                          aria-describedby={
+                            visibleActionMessage
+                              ? "signup-otp-help signup-message"
+                              : "signup-otp-help"
+                          }
+                          aria-invalid={Boolean(
+                            visibleActionMessage &&
+                            state.field ===
+                              SignupConstantsCollection.SignupActionField.Otp,
+                          )}
+                          className={`${INPUT_CLASS_NAME} text-center text-xl font-semibold tracking-[0.45em] tabular-nums`}
+                        />
+                        <p
+                          id="signup-otp-help"
+                          className="mt-2 text-xs leading-5 text-zinc-500"
+                        >
+                          You can paste the full code from your email.
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={changeOtpEmail}
+                            className="min-h-11 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-200"
+                          >
+                            Change email
+                          </button>
+                          <button
+                            type="submit"
+                            name="resendOtp"
+                            value="true"
+                            formNoValidate
+                            className="min-h-11 rounded-xl px-3 text-sm font-semibold text-[#d91d60] transition hover:bg-[#fff0f5] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/15"
+                          >
+                            Send code again
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <label
+                          htmlFor="signup-otp-email"
+                          className="mb-2 block text-sm font-semibold text-zinc-800"
+                        >
+                          Email address
+                        </label>
+                        <input
+                          ref={emailInputRef}
+                          id="signup-otp-email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          inputMode="email"
+                          maxLength={254}
+                          required
+                          value={draft.email}
+                          onChange={(event) => {
+                            setDraft((currentDraft) => ({
+                              ...currentDraft,
+                              email: event.target.value,
+                            }));
+                            setDismissedResponseId(state.responseId);
+                          }}
+                          placeholder="you@example.com"
+                          aria-describedby={
+                            visibleActionMessage
+                              ? "signup-email-help signup-message"
+                              : "signup-email-help"
+                          }
+                          aria-invalid={Boolean(
+                            visibleActionMessage &&
+                            state.field ===
+                              SignupConstantsCollection.SignupActionField.Email,
+                          )}
+                          className={INPUT_CLASS_NAME}
+                        />
+                        <p
+                          id="signup-email-help"
+                          className="mt-2 text-xs leading-5 text-zinc-500"
+                        >
+                          We use this only to secure and recover your account.
+                        </p>
+                      </div>
+                    )
+                  ) : (
+                    <div className="space-y-5">
+                      <div>
+                        <label
+                          htmlFor="signup-password-email"
+                          className="mb-2 block text-sm font-semibold text-zinc-800"
+                        >
+                          Email address
+                        </label>
+                        <input
+                          ref={emailInputRef}
+                          id="signup-password-email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          inputMode="email"
+                          maxLength={254}
+                          required
+                          value={draft.email}
+                          onChange={(event) => {
+                            setDraft((currentDraft) => ({
+                              ...currentDraft,
+                              email: event.target.value,
+                            }));
+                            setDismissedResponseId(state.responseId);
+                          }}
+                          placeholder="you@example.com"
+                          aria-describedby={
+                            visibleActionMessage ? "signup-message" : undefined
+                          }
+                          aria-invalid={Boolean(
+                            visibleActionMessage &&
+                            state.field ===
+                              SignupConstantsCollection.SignupActionField.Email,
+                          )}
+                          className={INPUT_CLASS_NAME}
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="signup-password"
+                          className="mb-2 block text-sm font-semibold text-zinc-800"
+                        >
+                          Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            ref={passwordInputRef}
+                            id="signup-password"
+                            name="password"
+                            type={passwordVisible ? "text" : "password"}
+                            autoComplete="new-password"
+                            maxLength={32}
+                            minLength={8}
+                            required
+                            value={password}
+                            onChange={(event) => {
+                              setPassword(event.target.value);
+                              setDismissedResponseId(state.responseId);
+                            }}
+                            placeholder="Create a password"
+                            aria-describedby={
+                              visibleActionMessage
+                                ? "signup-password-requirements signup-message"
+                                : "signup-password-requirements"
+                            }
+                            aria-invalid={Boolean(
+                              visibleActionMessage &&
+                              state.field ===
+                                SignupConstantsCollection.SignupActionField
+                                  .Password,
+                            )}
+                            className={`${INPUT_CLASS_NAME} pr-20`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPasswordVisible(
+                                (currentVisibility) => !currentVisibility,
+                              )
+                            }
+                            className="absolute inset-y-0 right-2 my-auto min-h-10 rounded-xl px-3 text-xs font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-200"
+                            aria-label={
+                              passwordVisible
+                                ? "Hide password"
+                                : "Show password"
+                            }
+                          >
+                            {passwordVisible ? "Hide" : "Show"}
+                          </button>
+                        </div>
+                        <ul
+                          id="signup-password-requirements"
+                          className="mt-3 grid gap-2 text-xs sm:grid-cols-2"
+                          aria-label="Password requirements"
+                        >
+                          {passwordRequirements.map((requirement) => (
+                            <li
+                              key={requirement.label}
+                              className={
+                                requirement.met
+                                  ? "flex items-center gap-2 text-emerald-700"
+                                  : "flex items-center gap-2 text-zinc-500"
+                              }
+                            >
+                              <span aria-hidden="true">
+                                {requirement.met ? "✓" : "○"}
+                              </span>
+                              {requirement.label}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </fieldset>
+              </div>
+            ) : null}
+          </div>
+
+          {hint ? (
+            <SignupMessage isError message={hint} />
+          ) : visibleActionMessage ? (
+            <SignupMessage
+              isError={state.isError}
+              message={visibleActionMessage}
+            />
+          ) : null}
+
+          <div className="sticky bottom-0 z-20 mt-auto -mx-2 px-2 pt-8 pb-[max(1rem,env(safe-area-inset-bottom))] lg:static lg:mx-0 lg:mt-8 lg:px-0 lg:pt-0 lg:pb-0">
+            {isAccountStep ? (
+              <div className="space-y-4">
+                <SignupSubmitButton
+                  disabled={state.success}
+                  idleLabel={
+                    mode === SignupConstantsCollection.SignupMode.Password
+                      ? "Create my account"
+                      : isOtpCodeStep
+                        ? "Verify and start matching"
+                        : "Email me a code"
+                  }
+                  pendingLabel={
+                    mode === SignupConstantsCollection.SignupMode.Password
+                      ? "Creating your account…"
+                      : isOtpCodeStep
+                        ? "Verifying your code…"
+                        : "Sending your code…"
+                  }
+                  resendPendingLabel="Sending another code…"
+                />
+                <p className="text-center text-sm text-zinc-500">
+                  {mode === SignupConstantsCollection.SignupMode.Otp
+                    ? "Prefer using a password?"
+                    : "Want the faster option?"}{" "}
+                  <button
+                    type="button"
+                    disabled={isPending || state.success}
+                    onClick={
+                      mode === SignupConstantsCollection.SignupMode.Otp
+                        ? showPasswordSignup
+                        : showOtpSignup
+                    }
+                    className="min-h-11 rounded-lg px-2 font-semibold text-[#d91d60] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/15 disabled:cursor-wait disabled:opacity-50"
                   >
-                    8–32 characters with upper, lower, a number, and a symbol.
-                  </p>
-                </>
-              )}
-            </fieldset>
-            <SignupPreviewCard preview={preview} />
+                    {mode === SignupConstantsCollection.SignupMode.Otp
+                      ? "Use a password"
+                      : "Email me a code"}
+                  </button>
+                </p>
+              </div>
+            ) : optionalStep ? (
+              <OptionalStepActions onSkip={skipOptionalStep}>
+                <button
+                  type="submit"
+                  className="group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#fd267a] to-[#ff6036] px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(253,38,122,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(253,38,122,0.9)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/25"
+                >
+                  {getStepActionLabel({ step })}
+                  <span
+                    aria-hidden="true"
+                    className="ml-2 transition-transform group-hover:translate-x-1 motion-reduce:transition-none"
+                  >
+                    →
+                  </span>
+                </button>
+              </OptionalStepActions>
+            ) : (
+              <div className="space-y-3">
+                <button
+                  type="submit"
+                  className="group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#fd267a] to-[#ff6036] px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(253,38,122,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(253,38,122,0.9)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/25"
+                >
+                  {step === SignupStep.Hook && resumeStep
+                    ? "Continue my profile"
+                    : getStepActionLabel({ step })}
+                  <span
+                    aria-hidden="true"
+                    className="ml-2 transition-transform group-hover:translate-x-1 motion-reduce:transition-none"
+                  >
+                    →
+                  </span>
+                </button>
+                {step === SignupStep.Hook && resumeStep ? (
+                  <button
+                    type="button"
+                    onClick={discardSavedDraft}
+                    aria-label="Discard saved signup draft and start over"
+                    className="min-h-11 w-full rounded-xl px-4 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-100/70 hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-200"
+                  >
+                    Start over
+                  </button>
+                ) : null}
+              </div>
+            )}
           </div>
-        ) : null}
+        </section>
 
-        {hint ? (
-          <SignupMessage isError message={hint} />
-        ) : visibleActionMessage ? (
-          <SignupMessage
-            isError={state.isError}
-            message={visibleActionMessage}
-          />
-        ) : null}
-
-        <div className="mt-12 max-w-md">
-          {isAccountStep ? (
-            <div className="space-y-5">
-              <SignupSubmitButton
-                idleLabel={
-                  mode === SignupConstantsCollection.SignupMode.Password
-                    ? "Create account with password"
-                    : isOtpCodeStep
-                      ? "Verify and join"
-                      : "Email me a code"
-                }
-                pendingLabel={
-                  mode === SignupConstantsCollection.SignupMode.Password
-                    ? "Creating your account…"
-                    : isOtpCodeStep
-                      ? "Verifying…"
-                      : "Sending code…"
-                }
-              />
-              <SignupModeSwitch
-                disabled={isPending}
-                label={
-                  mode === SignupConstantsCollection.SignupMode.Otp
-                    ? "Use password instead"
-                    : "Email me a code"
-                }
-                onSwitch={
-                  mode === SignupConstantsCollection.SignupMode.Otp
-                    ? showPasswordSignup
-                    : showOtpSignup
-                }
-                prompt={
-                  mode === SignupConstantsCollection.SignupMode.Otp
-                    ? "Prefer a password?"
-                    : "Want the faster option?"
-                }
-              />
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={
-                step === AuthConstantsCollection.SignupStep.Hook
-                  ? () => setStep(getNextStep({ step }))
-                  : goNext
-              }
-              className="group flex min-h-14 w-full items-center justify-center rounded-full bg-white px-6 text-base font-semibold text-zinc-950 shadow-[0_18px_40px_-16px_rgba(255,255,255,0.55)] transition hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
-            >
-              {step === AuthConstantsCollection.SignupStep.Hook
-                ? "Drop in"
-                : "Keep going"}
-            </button>
-          )}
-        </div>
-      </div>
+        <aside
+          aria-label="Profile preview"
+          className="hidden items-center justify-center lg:flex"
+        >
+          <ProfilePreview draft={draft} />
+        </aside>
+      </main>
     </form>
   );
 };
 
 /*
- * Learning notes
+ * React 19 learning notes
+ * - `useActionState` keeps OTP/password mutation results attached to the form.
+ * - `useFormStatus` lets the nested account button read pending state and the
+ *   submitted `FormData`, so OTP retries receive an accurate pending label.
+ * - React 18.2 typically required separate request, pending, error, and result
+ *   state plus manual tracking of which submit button started the request.
  *
- * React 19 Action and `useActionState`
- * - Earlier profile steps stay local. The account step submits one Action for
- *   OTP send, OTP verification, or the existing password signup.
- * - The Action's returned step and pending state drive the verification UI
- *   without an Effect or a separate request-state bridge.
- * - A local session number hides results from an abandoned email or mode while
- *   preserving the profile draft.
- *
- * React 18.2 comparison
- * - React 18 usually used `onSubmit`, `preventDefault`, and separate local
- *   state for pending, request errors, and the OTP step.
- * - React 19 keeps the async mutation state tied to the form submission.
+ * Next.js 16 learning notes
+ * - The route remains a Server Component shell while this focused Client
+ *   Component owns browser-only draft storage and interactive step state.
+ * - Next.js 14.1 used the same Server/Client boundary, but the current app uses
+ *   the Next.js 16 async routing and metadata conventions around that boundary.
  */
