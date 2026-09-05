@@ -53,6 +53,14 @@ const ChatInboxPage = async () => {
     );
   }
 
+  // A refreshed server snapshot remounts the inbox so its local realtime state starts from authoritative data.
+  const inboxSnapshotKey = result.conversations
+    .map(
+      (conversation) =>
+        `${conversation.conversationId}:${String(conversation.lastMessage.sequenceNumber)}:${String(conversation.unreadCount)}:${conversation.lastMessage.deliveryStatus ?? "incoming"}`,
+    )
+    .join("|");
+
   return (
     <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-10 text-zinc-950 sm:px-6">
       <section className="mx-auto max-w-2xl">
@@ -63,7 +71,11 @@ const ChatInboxPage = async () => {
           Messages
         </h1>
 
-        <ConversationInbox initialConversations={result.conversations} />
+        <ConversationInbox
+          key={inboxSnapshotKey}
+          initialConversations={result.conversations}
+          initialNextCursor={result.nextCursor}
+        />
       </section>
     </main>
   );

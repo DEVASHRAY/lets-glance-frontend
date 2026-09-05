@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { ConnectionsConstantsCollection } from "@/features/connections/connections.constants";
@@ -52,6 +53,11 @@ interface ProfileOverlayDecide {
   kind: typeof ConnectionsConstantsCollection.ProfileOverlayKind.Decide;
 }
 
+interface ProfileOverlayMessage {
+  connectionId: string;
+  kind: typeof ConnectionsConstantsCollection.ProfileOverlayKind.Status;
+}
+
 interface ProfileOverlayStatus {
   kind: typeof ConnectionsConstantsCollection.ProfileOverlayKind.Status;
   label: string;
@@ -59,6 +65,7 @@ interface ProfileOverlayStatus {
 
 type ProfileOverlay =
   | ProfileOverlayDecide
+  | ProfileOverlayMessage
   | ProfileOverlayNone
   | ProfileOverlayReview
   | ProfileOverlayStatus;
@@ -111,8 +118,8 @@ const getProfileOverlay = ({
     ConnectionsConstantsCollection.ConnectionStatus.Accepted
   ) {
     return {
+      connectionId: peerResult.connection.connectionId,
       kind: ConnectionsConstantsCollection.ProfileOverlayKind.Status,
-      label: "It's a match",
     };
   }
 
@@ -122,7 +129,7 @@ const getProfileOverlay = ({
   ) {
     return {
       kind: ConnectionsConstantsCollection.ProfileOverlayKind.Status,
-      label: "Liked",
+      label: "Like sent",
     };
   }
 
@@ -157,14 +164,37 @@ const getOverlayActions = ({
   if (
     overlay.kind === ConnectionsConstantsCollection.ProfileOverlayKind.Decide
   ) {
-    return (
-      <DecideProfileForm personName={personName} receiverId={profileId} />
-    );
+    return <DecideProfileForm personName={personName} receiverId={profileId} />;
   }
 
   if (
     overlay.kind === ConnectionsConstantsCollection.ProfileOverlayKind.Status
   ) {
+    if ("connectionId" in overlay) {
+      return (
+        <Link
+          href={`/chat/${overlay.connectionId}`}
+          prefetch={false}
+          aria-label={`Message ${personName}`}
+          className="inline-flex size-14 items-center justify-center gap-2 rounded-full bg-[#f32672] text-sm font-semibold text-white shadow-[0_16px_36px_-18px_rgba(91,16,48,0.65)] transition hover:bg-[#d91d60] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/30 sm:h-12 sm:w-auto sm:px-5"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-4"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+          >
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+          </svg>
+          <span className="sr-only sm:not-sr-only">Message</span>
+        </Link>
+      );
+    }
+
     return (
       <p className="rounded-full bg-white/95 px-5 py-2.5 text-sm font-semibold text-zinc-900 shadow-[0_16px_36px_-18px_rgba(15,15,15,0.55)]">
         {overlay.label}
@@ -208,7 +238,9 @@ export const generateMetadata = async ({
 
   const result = await loadPerson({ id });
 
-  if (result.outcome !== ProfileConstantsCollection.ProfileLoadOutcome.Success) {
+  if (
+    result.outcome !== ProfileConstantsCollection.ProfileLoadOutcome.Success
+  ) {
     return {
       title: "Profile | Tinder Lite",
     };
@@ -250,7 +282,9 @@ const PersonPage = async ({ params }: PageProps<"/people/[id]">) => {
     notFound();
   }
 
-  if (result.outcome === ProfileConstantsCollection.ProfileLoadOutcome.Failure) {
+  if (
+    result.outcome === ProfileConstantsCollection.ProfileLoadOutcome.Failure
+  ) {
     return (
       <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-12 text-zinc-950 sm:px-6">
         <div
@@ -274,21 +308,26 @@ const PersonPage = async ({ params }: PageProps<"/people/[id]">) => {
     profileId: profile.id,
     viewerId,
   });
+  const overlayActions = getOverlayActions({
+    overlay,
+    personName: profile.name,
+    profileId: profile.id,
+  });
+  const messageActionIsFloating =
+    overlay.kind === ConnectionsConstantsCollection.ProfileOverlayKind.Status &&
+    "connectionId" in overlay;
 
   return (
     <main className="bg-[#fff8f6] text-zinc-950">
       <PersonProfileDetails
-        actions={getOverlayActions({
-          overlay,
-          personName: profile.name,
-          profileId: profile.id,
-        })}
+        actions={messageActionIsFloating ? undefined : overlayActions}
         eyebrow={
           overlay.kind ===
           ConnectionsConstantsCollection.ProfileOverlayKind.Review
             ? "Liked you"
             : "Profile"
         }
+        floatingActions={messageActionIsFloating ? overlayActions : undefined}
         profile={profile}
       />
     </main>

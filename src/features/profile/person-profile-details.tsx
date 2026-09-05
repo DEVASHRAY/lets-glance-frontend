@@ -7,6 +7,7 @@ import type { PublicProfile } from "@/features/profile/profile.schemas";
 interface PersonProfileDetailsProps {
   actions?: ReactNode;
   eyebrow: string;
+  floatingActions?: ReactNode;
   privateFacts?: DetailFact[];
   profile: PublicProfile;
 }
@@ -59,7 +60,11 @@ const getOrderedPhotos = ({
   return [];
 };
 
-const getFactsWithValues = ({ facts }: { facts: DetailFact[] }): DetailFact[] => {
+const getFactsWithValues = ({
+  facts,
+}: {
+  facts: DetailFact[];
+}): DetailFact[] => {
   return facts.filter((fact) => fact.value);
 };
 
@@ -95,6 +100,7 @@ const FactTile = ({ label, value }: DetailFact) => {
 export const PersonProfileDetails = ({
   actions,
   eyebrow,
+  floatingActions,
   privateFacts,
   profile,
 }: PersonProfileDetailsProps) => {
@@ -182,7 +188,13 @@ export const PersonProfileDetails = ({
   });
 
   return (
-    <article className="mx-auto grid max-w-6xl gap-4 px-4 py-5 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)] lg:items-start lg:py-6">
+    <article
+      className={
+        floatingActions
+          ? "mx-auto grid max-w-6xl gap-4 px-4 pt-5 pb-24 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)] lg:items-start lg:pt-6 lg:pb-24"
+          : "mx-auto grid max-w-6xl gap-4 px-4 py-5 lg:grid-cols-[minmax(17rem,22rem)_minmax(0,1fr)] lg:items-start lg:py-6"
+      }
+    >
       <div className="lg:sticky lg:top-20">
         <div className="relative aspect-[3/4] overflow-hidden rounded-[1.8rem] bg-zinc-200 sm:aspect-[4/5] lg:aspect-auto lg:h-[calc(100svh-6.5rem)]">
           <ProfilePortrait
@@ -288,6 +300,12 @@ export const PersonProfileDetails = ({
           </ul>
         ) : null}
       </div>
+
+      {floatingActions ? (
+        <div className="fixed right-4 bottom-4 z-40 sm:right-6 sm:bottom-6">
+          {floatingActions}
+        </div>
+      ) : null}
     </article>
   );
 };

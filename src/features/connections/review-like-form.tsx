@@ -11,11 +11,13 @@ import {
 } from "@/features/connections/review-like.action";
 
 interface ReviewLikeFormProps {
+  compact?: boolean;
   connectionId: string;
   personName: string;
 }
 
 export const ReviewLikeForm = ({
+  compact = false,
   connectionId,
   personName,
 }: ReviewLikeFormProps) => {
@@ -58,14 +60,23 @@ export const ReviewLikeForm = ({
 
   return (
     <div className={isHidden ? "hidden" : undefined}>
-      <form action={formAction} className="flex items-end justify-center gap-5">
+      <form
+        action={formAction}
+        className={
+          compact
+            ? "flex items-end justify-center gap-2"
+            : "flex items-end justify-center gap-5"
+        }
+      >
         <input type="hidden" name="connectionId" value={connectionId} />
         <ReviewLikeButton
+          compact={compact}
           label={`Pass on ${personName}`}
           status={ConnectionsConstantsCollection.LikeReviewStatus.Rejected}
           variant="reject"
         />
         <ReviewLikeButton
+          compact={compact}
           label={`Like ${personName}`}
           status={ConnectionsConstantsCollection.LikeReviewStatus.Accepted}
           variant="accept"

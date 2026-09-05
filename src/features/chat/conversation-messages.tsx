@@ -169,6 +169,10 @@ export const ConversationMessages = ({
   const shouldScrollToLatestMessage = useRef(true);
   const olderMessagesRequestPending = useRef(false);
   const olderMessagesAbortController = useRef<AbortController | null>(null);
+  const reconnectSynchronizationPending = useRef(false);
+  const reconnectSynchronizationAbortController =
+    useRef<AbortController | null>(null);
+  const conversationMayBeStale = useRef(false);
   const pendingScrollRestoration = useRef<PendingScrollRestoration | null>(
     null,
   );
@@ -435,6 +439,13 @@ export const ConversationMessages = ({
       if (abortController) {
         abortController.abort();
       }
+
+      const reconnectAbortController =
+        reconnectSynchronizationAbortController.current;
+
+      if (reconnectAbortController) {
+        reconnectAbortController.abort();
+      }
     };
   }, []);
 
@@ -474,6 +485,135 @@ export const ConversationMessages = ({
 
       chatSocket.emit("message.mark-delivered", receipt);
       deliveredThroughSequenceNumber.current = receipt.sequenceNumber;
+    };
+
+    const synchronizeMessageHistory = async (): Promise<boolean> => {
+      const abortController = new AbortController();
+      reconnectSynchronizationAbortController.current = abortController;
+
+      try {
+        const response = await fetch(
+          `/api/v1/chat/connections/${encodeURIComponent(connectionId)}/messages`,
+          {
+            cache: "no-store",
+            method: "GET",
+            signal: abortController.signal,
+          },
+        );
+
+        if (response.status === 401) {
+          router.replace("/login");
+          return true;
+        }
+
+        if (!response.ok) {
+          return false;
+        }
+
+        const parsedResponse =
+          ChatSchemasCollection.messageHistoryResponse.safeParse(
+            await response.json(),
+          );
+
+        if (
+          !parsedResponse.success ||
+          parsedResponse.data.data.authenticatedUserId !== authenticatedUserId
+        ) {
+          return false;
+        }
+
+        const synchronizedMessages = parsedResponse.data.data.items;
+        const earliestSynchronizedMessage = synchronizedMessages.at(0);
+        const historyGapDetected =
+          earliestSynchronizedMessage &&
+          earliestSynchronizedMessage.sequenceNumber > 1 &&
+          !loadedSequenceNumbers.current.has(
+            earliestSynchronizedMessage.sequenceNumber,
+          ) &&
+          !loadedSequenceNumbers.current.has(
+            earliestSynchronizedMessage.sequenceNumber - 1,
+          );
+        const containsNewMessage = synchronizedMessages.some(
+          (message) =>
+            !loadedMessageIds.current.has(message.id) &&
+            !loadedSequenceNumbers.current.has(message.sequenceNumber),
+        );
+
+        if (containsNewMessage) {
+          const viewport = messageViewport.current;
+          shouldScrollToLatestMessage.current =
+            !viewport ||
+            viewport.scrollHeight -
+              viewport.scrollTop -
+              viewport.clientHeight <=
+              96;
+        }
+
+        for (const message of synchronizedMessages) {
+          loadedMessageIds.current.add(message.id);
+          loadedSequenceNumbers.current.add(message.sequenceNumber);
+        }
+
+        if (historyGapDetected) {
+          setNextLastLoadedSequenceNumber(
+            parsedResponse.data.data.nextLastLoadedSequenceNumber,
+          );
+        }
+
+        setMessages((currentMessages) => {
+          let nextMessages = currentMessages;
+
+          for (const message of synchronizedMessages) {
+            const existingMessageIndex = nextMessages.findIndex(
+              (currentMessage) =>
+                currentMessage.id === message.id ||
+                currentMessage.sequenceNumber === message.sequenceNumber,
+            );
+
+            if (existingMessageIndex < 0) {
+              nextMessages = insertMessage({
+                currentMessages: nextMessages,
+                message,
+              });
+              continue;
+            }
+
+            nextMessages = nextMessages.map((currentMessage, index) =>
+              index === existingMessageIndex ? message : currentMessage,
+            );
+          }
+
+          return nextMessages;
+        });
+
+        const latestSynchronizedMessage = synchronizedMessages.at(-1);
+
+        if (
+          latestSynchronizedMessage &&
+          parsedResponse.data.data.readAcknowledgementRequired &&
+          parsedResponse.data.data.readAcknowledgementSequenceNumber
+        ) {
+          pendingIncomingReceipt.current = {
+            conversationId: latestSynchronizedMessage.conversationId,
+            sequenceNumber:
+              parsedResponse.data.data.readAcknowledgementSequenceNumber,
+          };
+        }
+
+        return true;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return false;
+        }
+
+        return false;
+      } finally {
+        if (
+          reconnectSynchronizationAbortController.current === abortController
+        ) {
+          reconnectSynchronizationAbortController.current = null;
+        }
+      }
     };
 
     const receiveMessageCreated = (payload: MessageCreatedPayload) => {
@@ -584,14 +724,46 @@ export const ConversationMessages = ({
       );
     };
 
-    const retryPendingIncomingReceipt = () => {
+    const synchronizeAfterReconnect = () => {
+      acknowledgePendingIncomingMessage();
+
+      if (
+        !conversationMayBeStale.current ||
+        reconnectSynchronizationPending.current
+      ) {
+        return;
+      }
+
+      conversationMayBeStale.current = false;
+      reconnectSynchronizationPending.current = true;
+
+      startTransition(async () => {
+        try {
+          const synchronized = await synchronizeMessageHistory();
+
+          if (!synchronized) {
+            conversationMayBeStale.current = true;
+            return;
+          }
+
+          acknowledgePendingIncomingMessage();
+        } catch {
+          conversationMayBeStale.current = true;
+        } finally {
+          reconnectSynchronizationPending.current = false;
+        }
+      });
+    };
+
+    const rememberSocketDisconnect = () => {
+      conversationMayBeStale.current = true;
       // The prior connection may have closed before its receipt reached the server.
       deliveredThroughSequenceNumber.current = 0;
       readThroughSequenceNumber.current = 0;
     };
 
-    chatSocket.on("connect", acknowledgePendingIncomingMessage);
-    chatSocket.on("disconnect", retryPendingIncomingReceipt);
+    chatSocket.on("connect", synchronizeAfterReconnect);
+    chatSocket.on("disconnect", rememberSocketDisconnect);
     chatSocket.on("message.created", receiveMessageCreated);
     chatSocket.on("message.delivered", markOutgoingMessagesDelivered);
     chatSocket.on("message.read", markOutgoingMessagesRead);
@@ -602,8 +774,8 @@ export const ConversationMessages = ({
     acknowledgePendingIncomingMessage();
 
     return () => {
-      chatSocket.off("connect", acknowledgePendingIncomingMessage);
-      chatSocket.off("disconnect", retryPendingIncomingReceipt);
+      chatSocket.off("connect", synchronizeAfterReconnect);
+      chatSocket.off("disconnect", rememberSocketDisconnect);
       chatSocket.off("message.created", receiveMessageCreated);
       chatSocket.off("message.delivered", markOutgoingMessagesDelivered);
       chatSocket.off("message.read", markOutgoingMessagesRead);
@@ -612,7 +784,7 @@ export const ConversationMessages = ({
         acknowledgePendingIncomingMessage,
       );
     };
-  }, [authenticatedUserId, connectionId]);
+  }, [authenticatedUserId, connectionId, router]);
 
   return (
     <>

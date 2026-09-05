@@ -5,6 +5,8 @@ import { z } from "zod";
 import { ChatConstantsCollection } from "@/features/chat/chat.constants";
 import {
   ChatSchemasCollection,
+  type ChatPeer,
+  type ConversationInboxItem,
   type MessageHistoryItem,
 } from "@/features/chat/chat.schemas";
 import { requestBackend } from "@/lib/server/backend-client";
@@ -12,40 +14,6 @@ import { getAuthenticationCookieHeader } from "@/lib/server/session";
 
 const objectId = z.string().regex(/^[0-9a-f]{24}$/u);
 const sequenceNumber = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
-
-const conversationInboxItem = z.object({
-  connectionId: objectId,
-  conversationId: objectId,
-  lastMessage: z.object({
-    createdAt: z.iso.datetime(),
-    deliveryAcknowledgementRequired: z.boolean(),
-    deliveryStatus: z
-      .enum(ChatConstantsCollection.MessageDeliveryStatus)
-      .nullable(),
-    sentByAuthenticatedUser: z.boolean(),
-    sequenceNumber,
-    textPreview: z.string().trim().min(1).max(120),
-  }),
-  peer: z.object({
-    id: objectId,
-    name: z.string().trim().min(1).max(50).nullable(),
-    photoUrl: z.url().nullable(),
-  }),
-  unreadCount: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
-});
-
-const conversationInboxResponse = z.object({
-  data: z.object({
-    items: z.array(conversationInboxItem).max(20),
-    nextCursor: z
-      .string()
-      .regex(/^[1-9]\d{12}:[0-9a-f]{24}$/u)
-      .nullable(),
-  }),
-  message: z.string(),
-});
-
-export type ConversationInboxItem = z.infer<typeof conversationInboxItem>;
 
 interface ConversationInboxLoadSuccess {
   conversations: ConversationInboxItem[];
@@ -77,6 +45,7 @@ interface MessageHistoryLoadSuccess {
   messages: MessageHistoryItem[];
   nextLastLoadedSequenceNumber: number | null;
   outcome: typeof ChatConstantsCollection.MessageHistoryLoadOutcome.Success;
+  peer: ChatPeer;
   readAcknowledgementRequired: boolean;
   readAcknowledgementSequenceNumber: number | null;
 }
@@ -132,9 +101,10 @@ export const loadConversationInbox =
         };
       }
 
-      const parsedResponse = conversationInboxResponse.safeParse(
-        await response.json(),
-      );
+      const parsedResponse =
+        ChatSchemasCollection.conversationInboxResponse.safeParse(
+          await response.json(),
+        );
 
       if (!parsedResponse.success) {
         return {
@@ -249,6 +219,7 @@ export const loadMessageHistory = async ({
       nextLastLoadedSequenceNumber:
         parsedResponse.data.data.nextLastLoadedSequenceNumber,
       outcome: ChatConstantsCollection.MessageHistoryLoadOutcome.Success,
+      peer: parsedResponse.data.data.peer,
       readAcknowledgementRequired:
         parsedResponse.data.data.readAcknowledgementRequired,
       readAcknowledgementSequenceNumber:

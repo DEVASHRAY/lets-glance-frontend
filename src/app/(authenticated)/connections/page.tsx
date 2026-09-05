@@ -55,11 +55,7 @@ const resolveConnectionList = ({
   }
 };
 
-const ConnectionTab = ({
-  active,
-  children,
-  href,
-}: ConnectionTabProps) => {
+const ConnectionTab = ({ active, children, href }: ConnectionTabProps) => {
   return (
     <Link
       href={href}
@@ -91,32 +87,14 @@ const getEmptyState = ({
       };
     default:
       return {
-        message: "When you both choose each other, your matches will appear here.",
+        message:
+          "When you both choose each other, your matches will appear here.",
         title: "No matches yet",
       };
   }
 };
 
-interface GetConnectionBadgeInput {
-  connectionType: ConnectionList;
-}
-
-const getConnectionBadge = ({
-  connectionType,
-}: GetConnectionBadgeInput): string => {
-  switch (connectionType) {
-    case ConnectionsConstantsCollection.ConnectionList.Received:
-      return "Liked you";
-    case ConnectionsConstantsCollection.ConnectionList.Sent:
-      return "Sent";
-    default:
-      return "Match";
-  }
-};
-
-const ConnectionsPage = async ({
-  searchParams,
-}: PageProps<"/connections">) => {
+const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
   let typeValue: string | string[] | undefined;
 
   try {
@@ -239,12 +217,15 @@ const ConnectionsPage = async ({
         {result.connections.length ? (
           <ul
             aria-label="Connection profiles"
-            className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
           >
             {result.connections.map((connection) => {
               const isReceived =
                 connectionType ===
                 ConnectionsConstantsCollection.ConnectionList.Received;
+              const isMatch =
+                connectionType ===
+                ConnectionsConstantsCollection.ConnectionList.Matches;
 
               return (
                 <ConnectionPortraitCard
@@ -252,12 +233,33 @@ const ConnectionsPage = async ({
                   actions={
                     isReceived ? (
                       <ReviewLikeForm
+                        compact
                         connectionId={connection.connectionId}
                         personName={connection.profile.name}
                       />
+                    ) : isMatch ? (
+                      <Link
+                        href={`/chat/${connection.connectionId}`}
+                        prefetch={false}
+                        aria-label={`Message ${connection.profile.name}`}
+                        className="inline-flex size-10 items-center justify-center gap-1.5 rounded-full bg-[#f32672] text-xs font-semibold text-white shadow-sm transition hover:bg-[#d91d60] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/30 sm:h-9 sm:w-auto sm:px-3"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          className="size-4"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                        >
+                          <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                        </svg>
+                        <span className="sr-only sm:not-sr-only">Message</span>
+                      </Link>
                     ) : null
                   }
-                  badge={getConnectionBadge({ connectionType })}
                   profile={connection.profile}
                 />
               );
@@ -271,9 +273,7 @@ const ConnectionsPage = async ({
             >
               ♥
             </span>
-            <h2 className="mt-5 text-xl font-semibold">
-              {emptyState.title}
-            </h2>
+            <h2 className="mt-5 text-xl font-semibold">{emptyState.title}</h2>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-zinc-500">
               {emptyState.message}
             </p>

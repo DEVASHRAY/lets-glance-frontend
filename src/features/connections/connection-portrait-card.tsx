@@ -2,51 +2,44 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { ConnectionProfile } from "@/features/connections/connections.schemas";
-import { ProfilePortrait } from "@/features/profile/profile-portrait";
+import { ProfileAvatar } from "@/features/profile/profile-avatar";
 
 interface ConnectionPortraitCardProps {
   actions?: ReactNode;
-  badge: string;
   profile: ConnectionProfile;
 }
 
 export const ConnectionPortraitCard = ({
   actions,
-  badge,
   profile,
 }: ConnectionPortraitCardProps) => {
   return (
-    <li>
-      <article className="relative">
+    <li className="min-w-0">
+      <article className="group relative flex h-full cursor-pointer flex-col rounded-2xl border border-zinc-200 bg-white p-3 shadow-[0_14px_36px_-30px_rgba(72,24,49,0.5)] transition hover:border-[#f32672]/25 hover:bg-[#fff7fa] hover:shadow-[0_18px_42px_-28px_rgba(72,24,49,0.55)]">
         <Link
           href={`/people/${profile.id}`}
-          className="block overflow-hidden rounded-[1.8rem] bg-zinc-200 shadow-[0_22px_60px_-38px_rgba(72,24,49,0.55)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/20"
+          className="absolute inset-0 rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/20"
         >
-          <div className="relative aspect-[3/4]">
-            <ProfilePortrait
-              name={profile.name}
-              photoUrl={profile.photoUrl}
-              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
-            />
-            <div
-              className={
-                actions
-                  ? "absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent px-5 pt-24 pb-20"
-                  : "absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent px-5 pt-16 pb-5"
-              }
-            >
-              <p className="inline-flex rounded-full bg-white/18 px-2.5 py-1 text-[0.65rem] font-bold tracking-[0.16em] text-white uppercase backdrop-blur-md">
-                {badge}
-              </p>
-              <h2 className="mt-2 truncate text-2xl leading-tight font-semibold tracking-[-0.04em] text-white">
-                {profile.name}, {profile.age}
-              </h2>
-            </div>
-          </div>
+          <span className="sr-only">View {profile.name}&apos;s profile</span>
         </Link>
 
+        <div className="pointer-events-none relative z-10 flex min-w-0 items-center gap-2.5">
+          <ProfileAvatar
+            className="size-11 rounded-xl text-sm sm:size-12"
+            name={profile.name}
+            photoUrl={profile.photoUrl}
+            sizes="48px"
+          />
+
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-zinc-950">
+              {profile.name}, {profile.age}
+            </span>
+          </span>
+        </div>
+
         {actions ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center">
+          <div className="pointer-events-none relative z-20 mt-2 flex min-h-10 items-center justify-center border-t border-zinc-100 pt-2">
             <div className="pointer-events-auto">{actions}</div>
           </div>
         ) : null}

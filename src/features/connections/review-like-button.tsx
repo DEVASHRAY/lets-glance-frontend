@@ -10,6 +10,7 @@ type ConnectionButtonStatus =
   | typeof ConnectionsConstantsCollection.ConnectionStatus.Interested;
 
 interface ReviewLikeButtonProps {
+  compact?: boolean;
   label: string;
   status: ConnectionButtonStatus;
   variant: "accept" | "reject";
@@ -45,6 +46,7 @@ const LikeIcon = () => {
 };
 
 export const ReviewLikeButton = ({
+  compact = false,
   label,
   status,
   variant,
@@ -61,8 +63,8 @@ export const ReviewLikeButton = ({
       aria-label={pending ? "Saving" : label}
       className={
         isAccept
-          ? "flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-[#f32672] to-[#ff6840] text-white shadow-[0_18px_40px_-12px_rgba(243,38,114,0.95)] transition duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/35 disabled:cursor-wait disabled:opacity-50 disabled:hover:scale-100"
-          : "flex size-14 items-center justify-center rounded-full bg-white text-zinc-900 shadow-[0_14px_32px_-12px_rgba(15,15,15,0.45)] transition duration-200 hover:scale-110 hover:text-[#f32672] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/80 disabled:cursor-wait disabled:opacity-50 disabled:hover:scale-100"
+          ? `flex items-center justify-center rounded-full bg-gradient-to-br from-[#f32672] to-[#ff6840] text-white shadow-[0_18px_40px_-12px_rgba(243,38,114,0.95)] transition duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/35 disabled:cursor-wait disabled:opacity-50 disabled:hover:scale-100 ${compact ? "size-11 [&_svg]:size-5" : "size-16"}`
+          : `flex items-center justify-center rounded-full bg-white text-zinc-900 shadow-[0_14px_32px_-12px_rgba(15,15,15,0.45)] transition duration-200 hover:scale-110 hover:text-[#f32672] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/80 disabled:cursor-wait disabled:opacity-50 disabled:hover:scale-100 ${compact ? "size-10 [&_svg]:size-4" : "size-14"}`
       }
     >
       {isAccept ? <LikeIcon /> : <PassIcon />}

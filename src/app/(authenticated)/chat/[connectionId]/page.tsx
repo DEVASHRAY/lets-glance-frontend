@@ -7,6 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import { ChatConstantsCollection } from "@/features/chat/chat.constants";
 import { ConversationMessages } from "@/features/chat/conversation-messages";
 import { loadMessageHistory } from "@/features/chat/chat.data";
+import { ProfileAvatar } from "@/features/profile/profile-avatar";
 
 export const metadata: Metadata = {
   title: "Conversation | Tinder Lite",
@@ -75,6 +76,8 @@ const ChatConversationPage = async ({
     );
   }
 
+  const peerName = result.peer.name ?? "Tinder Lite member";
+
   return (
     <main className="fixed inset-x-0 top-16 bottom-0 overflow-hidden bg-[#fff8f6] px-4 py-4 text-zinc-950 sm:px-6 sm:py-6">
       <section className="mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
@@ -98,10 +101,22 @@ const ChatConversationPage = async ({
             </svg>
           </Link>
 
-          <div>
-            <h1 className="font-semibold">Conversation</h1>
-            <p className="text-xs text-zinc-500">Your latest messages</p>
-          </div>
+          <Link
+            href={`/people/${result.peer.id}`}
+            prefetch={false}
+            className="flex min-w-0 items-center gap-3 rounded-xl py-1 pr-3 transition hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/20"
+          >
+            <ProfileAvatar
+              className="size-10 rounded-full text-sm"
+              name={peerName}
+              photoUrl={result.peer.photoUrl ?? undefined}
+              sizes="40px"
+            />
+            <span className="min-w-0">
+              <h1 className="truncate font-semibold">{peerName}</h1>
+              <span className="block text-xs text-zinc-500">View profile</span>
+            </span>
+          </Link>
         </header>
 
         <ConversationMessages
