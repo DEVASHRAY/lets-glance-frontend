@@ -44,7 +44,7 @@ Current backend behavior and constraints:
 - Every Express endpoint is mounted under `/api/v1`; the API has no CORS middleware.
 - Authentication uses an opaque JWT in the `token` HTTP-only cookie.
 - The cookie uses `SameSite=Lax`, path `/`, and `Secure` only in production.
-- The access token and cookie expire after ten minutes; no refresh flow exists.
+- The access token and cookie expire after one day; no refresh flow exists.
 - Protected routes read and verify the cookie in Express.
 - Typed application errors return 401, 403, 404, 409, 422, or 500 as appropriate.
 - Logout uses `POST /logout`.
@@ -175,7 +175,7 @@ Feed data is personalized. It must not enter a shared CDN cache. Initial policy 
 
 Before production integration:
 
-- Define refresh or reauthentication behavior for the ten-minute token expiry.
+- Define refresh or reauthentication behavior for the one-day token expiry.
 - Add abuse protection and rate limiting at appropriate ingress and backend boundaries.
 
 ## Temporary proxy surface

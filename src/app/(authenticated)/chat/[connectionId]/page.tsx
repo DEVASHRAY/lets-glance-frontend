@@ -1,21 +1,17 @@
+import { randomUUID } from "node:crypto";
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { ChatConstantsCollection } from "@/features/chat/chat.constants";
+import { ConversationMessages } from "@/features/chat/conversation-messages";
 import { loadMessageHistory } from "@/features/chat/chat.data";
-import { MessageDeliveryIcon } from "@/features/chat/message-delivery-icon";
 
 export const metadata: Metadata = {
   title: "Conversation | Tinder Lite",
   description: "Read your Tinder Lite conversation.",
 };
-
-const messageTimeFormatter = new Intl.DateTimeFormat("en", {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: "UTC",
-});
 
 const ChatConversationPage = async ({
   params,
@@ -80,9 +76,9 @@ const ChatConversationPage = async ({
   }
 
   return (
-    <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-6 text-zinc-950 sm:px-6">
-      <section className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
-        <header className="flex min-h-16 items-center gap-3 border-b border-zinc-100 px-4">
+    <main className="fixed inset-x-0 top-16 bottom-0 overflow-hidden bg-[#fff8f6] px-4 py-4 text-zinc-950 sm:px-6 sm:py-6">
+      <section className="mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
+        <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-zinc-100 px-4">
           <Link
             href="/chat"
             aria-label="Back to inbox"
@@ -108,64 +104,20 @@ const ChatConversationPage = async ({
           </div>
         </header>
 
-        {result.messages.length ? (
-          <ol
-            aria-label="Message history"
-            className="flex min-h-[28rem] flex-col justify-end gap-2 bg-[#fff8f6]/70 px-4 py-5"
-          >
-            {result.messages.map((message) => {
-              const sentByAuthenticatedUser = Boolean(message.deliveryStatus);
-
-              return (
-                <li
-                  key={message.id}
-                  className={
-                    sentByAuthenticatedUser
-                      ? "flex justify-end"
-                      : "flex justify-start"
-                  }
-                >
-                  <article
-                    className={
-                      sentByAuthenticatedUser
-                        ? "max-w-[82%] rounded-2xl rounded-br-md border border-[#f32672]/15 bg-[#fff0f5] px-3.5 py-2 text-zinc-950 shadow-sm"
-                        : "max-w-[82%] rounded-2xl rounded-bl-md border border-zinc-200 bg-white px-3.5 py-2 text-zinc-950 shadow-sm"
-                    }
-                  >
-                    <p className="whitespace-pre-wrap break-words text-sm leading-5">
-                      {message.text}
-                    </p>
-                    <span
-                      className={
-                        sentByAuthenticatedUser
-                          ? "mt-1 flex items-center justify-end gap-1 text-[0.6875rem] text-zinc-400"
-                          : "mt-1 flex justify-end text-[0.6875rem] text-zinc-400"
-                      }
-                    >
-                      <time dateTime={message.createdAt}>
-                        {messageTimeFormatter.format(
-                          new Date(message.createdAt),
-                        )}
-                      </time>
-                      {message.deliveryStatus ? (
-                        <MessageDeliveryIcon status={message.deliveryStatus} />
-                      ) : null}
-                    </span>
-                  </article>
-                </li>
-              );
-            })}
-          </ol>
-        ) : (
-          <div className="flex min-h-[28rem] items-center justify-center bg-[#fff8f6]/70 px-6 text-center">
-            <div>
-              <h2 className="text-lg font-semibold">No messages yet</h2>
-              <p className="mt-2 text-sm text-zinc-500">
-                Start the conversation when you are ready.
-              </p>
-            </div>
-          </div>
-        )}
+        <ConversationMessages
+          key={connectionId}
+          authenticatedUserId={result.authenticatedUserId}
+          connectionId={connectionId}
+          initialClientMessageId={randomUUID()}
+          initialMessages={result.messages}
+          initialNextLastLoadedSequenceNumber={
+            result.nextLastLoadedSequenceNumber
+          }
+          readAcknowledgementRequired={result.readAcknowledgementRequired}
+          readAcknowledgementSequenceNumber={
+            result.readAcknowledgementSequenceNumber
+          }
+        />
       </section>
     </main>
   );
@@ -177,4 +129,8 @@ export default ChatConversationPage;
  * Next.js 16 generated `PageProps` provides the typed dynamic route parameter,
  * and `params` must be awaited before reading `connectionId`. Next.js 14.1
  * commonly used handwritten props and exposed route parameters synchronously.
+ *
+ * Node's `randomUUID` creates a non-secret idempotency key on the server. The
+ * Client Component preserves it for retries and rotates it after a successful
+ * send, so one logical message keeps one identity.
  */

@@ -3,6 +3,10 @@ import "server-only";
 import { z } from "zod";
 
 import { ChatConstantsCollection } from "@/features/chat/chat.constants";
+import {
+  ChatSchemasCollection,
+  type MessageHistoryItem,
+} from "@/features/chat/chat.schemas";
 import { requestBackend } from "@/lib/server/backend-client";
 import { getAuthenticationCookieHeader } from "@/lib/server/session";
 
@@ -41,33 +45,7 @@ const conversationInboxResponse = z.object({
   message: z.string(),
 });
 
-const messageHistoryItem = z.object({
-  clientMessageId: z
-    .string()
-    .regex(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu,
-    ),
-  conversationId: objectId,
-  createdAt: z.iso.datetime(),
-  deliveryStatus: z
-    .enum(ChatConstantsCollection.MessageDeliveryStatus)
-    .nullable(),
-  id: objectId,
-  senderId: objectId,
-  sequenceNumber,
-  text: z.string().trim().min(1).max(2_000),
-});
-
-const messageHistoryResponse = z.object({
-  data: z.object({
-    items: z.array(messageHistoryItem).max(20),
-    nextLastLoadedSequenceNumber: sequenceNumber.nullable(),
-  }),
-  message: z.string(),
-});
-
 export type ConversationInboxItem = z.infer<typeof conversationInboxItem>;
-export type MessageHistoryItem = z.infer<typeof messageHistoryItem>;
 
 interface ConversationInboxLoadSuccess {
   conversations: ConversationInboxItem[];
@@ -95,9 +73,12 @@ interface LoadMessageHistoryInput {
 }
 
 interface MessageHistoryLoadSuccess {
+  authenticatedUserId: string;
   messages: MessageHistoryItem[];
   nextLastLoadedSequenceNumber: number | null;
   outcome: typeof ChatConstantsCollection.MessageHistoryLoadOutcome.Success;
+  readAcknowledgementRequired: boolean;
+  readAcknowledgementSequenceNumber: number | null;
 }
 
 interface MessageHistoryLoadMissing {
@@ -250,9 +231,10 @@ export const loadMessageHistory = async ({
       };
     }
 
-    const parsedResponse = messageHistoryResponse.safeParse(
-      await response.json(),
-    );
+    const parsedResponse =
+      ChatSchemasCollection.messageHistoryResponse.safeParse(
+        await response.json(),
+      );
 
     if (!parsedResponse.success) {
       return {
@@ -262,10 +244,15 @@ export const loadMessageHistory = async ({
     }
 
     return {
+      authenticatedUserId: parsedResponse.data.data.authenticatedUserId,
       messages: parsedResponse.data.data.items,
       nextLastLoadedSequenceNumber:
         parsedResponse.data.data.nextLastLoadedSequenceNumber,
       outcome: ChatConstantsCollection.MessageHistoryLoadOutcome.Success,
+      readAcknowledgementRequired:
+        parsedResponse.data.data.readAcknowledgementRequired,
+      readAcknowledgementSequenceNumber:
+        parsedResponse.data.data.readAcknowledgementSequenceNumber,
     };
   } catch (error) {
     return {

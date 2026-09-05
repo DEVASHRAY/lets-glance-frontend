@@ -17,8 +17,17 @@ enum MessageHistoryLoadOutcome {
   Unauthorized = "unauthorized",
 }
 
+enum SendMessageOutcome {
+  Conflict = "conflict",
+  Failure = "failure",
+  Idle = "idle",
+  Success = "success",
+  Unauthorized = "unauthorized",
+}
+
 export const ChatConstantsCollection = {
   ConversationInboxLoadOutcome,
   MessageDeliveryStatus,
   MessageHistoryLoadOutcome,
+  SendMessageOutcome,
 };
