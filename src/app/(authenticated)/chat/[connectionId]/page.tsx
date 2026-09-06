@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { BrandConstantsCollection } from "@/features/brand/brand.constants";
 import { ChatConstantsCollection } from "@/features/chat/chat.constants";
 import { ConversationMessages } from "@/features/chat/conversation-messages";
 import { loadMessageHistory } from "@/features/chat/chat.data";
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   interactiveWidget: "resizes-content",
-  themeColor: "#f8fafc",
+  themeColor: BrandConstantsCollection.ThemeColor,
   viewportFit: "cover",
 };
 
@@ -85,13 +86,13 @@ const ChatConversationPage = async ({
   const peerName = result.peer.name ?? "Member";
 
   return (
-    <main className="chat-route-surface chat-conversation-shell bg-brand-surface text-zinc-950">
-      <section className="mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
-        <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-zinc-100 px-4">
+    <main className="chat-route-surface chat-conversation-shell bg-brand-surface text-brand-ink">
+      <section className="border-brand-border bg-brand-panel mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden rounded-3xl border shadow-sm">
+        <header className="border-brand-border flex min-h-16 shrink-0 items-center gap-3 border-b px-4">
           <Link
             href="/chat"
             aria-label="Back to inbox"
-            className="focus-visible:ring-brand-600/20 flex size-10 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4"
+            className="text-brand-subtle hover:bg-brand-50 hover:text-brand-ink focus-visible:ring-brand-600/70 flex size-10 shrink-0 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-4"
           >
             <svg
               aria-hidden="true"
@@ -110,7 +111,7 @@ const ChatConversationPage = async ({
           <Link
             href={`/people/${result.peer.id}`}
             prefetch={false}
-            className="focus-visible:ring-brand-600/20 flex min-w-0 items-center gap-3 rounded-xl py-1 pr-3 transition hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-4"
+            className="hover:bg-brand-50 focus-visible:ring-brand-600/70 flex min-w-0 items-center gap-3 rounded-xl py-1 pr-3 transition focus-visible:outline-none focus-visible:ring-4"
           >
             <ProfileAvatar
               className="size-10 rounded-full text-sm"
@@ -120,7 +121,9 @@ const ChatConversationPage = async ({
             />
             <span className="min-w-0">
               <h1 className="truncate font-semibold">{peerName}</h1>
-              <span className="block text-xs text-zinc-500">View profile</span>
+              <span className="text-brand-subtle block text-xs">
+                View profile
+              </span>
             </span>
           </Link>
         </header>

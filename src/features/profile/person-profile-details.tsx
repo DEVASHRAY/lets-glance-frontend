@@ -32,7 +32,7 @@ const PILL_CLASS_NAME =
   "rounded-full border border-white/20 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md";
 
 const TILE_CLASS_NAME =
-  "rounded-[1.4rem] border border-white/80 bg-white/90 p-4 shadow-[0_18px_40px_-28px_rgba(30,41,59,0.32)]";
+  "border-brand-border bg-brand-panel/90 shadow-brand-panel rounded-[1.4rem] border p-4";
 
 const getOrderedPhotos = ({
   photoUrl,
@@ -74,11 +74,11 @@ const SpotlightCard = ({ body, kicker, label }: SpotlightCardProps) => {
       <p className="text-brand-700/70 text-[0.65rem] font-bold tracking-[0.18em] uppercase">
         {label}
       </p>
-      <p className="mt-2 text-xl leading-snug font-semibold tracking-[-0.03em] text-zinc-950">
+      <p className="text-brand-ink mt-2 text-xl leading-snug font-semibold tracking-[-0.03em]">
         {kicker}
       </p>
       {body ? (
-        <p className="mt-2 text-sm leading-6 text-zinc-600">{body}</p>
+        <p className="text-brand-muted mt-2 text-sm leading-6">{body}</p>
       ) : null}
     </section>
   );
@@ -90,7 +90,7 @@ const FactTile = ({ label, value }: DetailFact) => {
       <p className="text-brand-700/70 text-[0.65rem] font-bold tracking-[0.16em] uppercase">
         {label}
       </p>
-      <p className="mt-1.5 text-sm leading-6 font-medium text-zinc-800">
+      <p className="text-brand-ink/90 mt-1.5 text-sm leading-6 font-medium">
         {value}
       </p>
     </div>
@@ -241,7 +241,9 @@ export const PersonProfileDetails = ({
 
       <div className="space-y-3">
         {profile.bio ? (
-          <p className={`${TILE_CLASS_NAME} text-base leading-7 text-zinc-800`}>
+          <p
+            className={`${TILE_CLASS_NAME} text-brand-ink/90 text-base leading-7`}
+          >
             {profile.bio}
           </p>
         ) : null}
@@ -268,7 +270,7 @@ export const PersonProfileDetails = ({
               <p className="text-brand-700/70 text-[0.65rem] font-bold tracking-[0.18em] uppercase">
                 Sunday
               </p>
-              <p className="mt-2 text-sm leading-6 text-zinc-800">
+              <p className="text-brand-ink/90 mt-2 text-sm leading-6">
                 {lifestyle.sundayRitual}
               </p>
             </section>

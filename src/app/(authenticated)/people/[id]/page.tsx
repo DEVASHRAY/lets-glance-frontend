@@ -177,7 +177,7 @@ const getOverlayActions = ({
           href={`/chat/${overlay.connectionId}`}
           prefetch={false}
           aria-label={`Message ${personName}`}
-          className="bg-brand-600 hover:bg-brand-700 focus-visible:ring-brand-600/30 inline-flex size-14 items-center justify-center gap-2 rounded-full text-sm font-semibold text-white shadow-[0_16px_36px_-18px_rgba(49,46,129,0.55)] transition focus-visible:outline-none focus-visible:ring-4 sm:h-12 sm:w-auto sm:px-5"
+          className="bg-brand-600 hover:bg-brand-700 shadow-brand-glow focus-visible:ring-brand-600/70 inline-flex size-14 items-center justify-center gap-2 rounded-full text-sm font-semibold text-white transition focus-visible:outline-none focus-visible:ring-4 sm:h-12 sm:w-auto sm:px-5"
         >
           <svg
             aria-hidden="true"
@@ -197,7 +197,7 @@ const getOverlayActions = ({
     }
 
     return (
-      <p className="rounded-full bg-white/95 px-5 py-2.5 text-sm font-semibold text-zinc-900 shadow-[0_16px_36px_-18px_rgba(15,15,15,0.55)]">
+      <p className="bg-brand-panel text-brand-ink rounded-full px-5 py-2.5 text-sm font-semibold shadow-[0_16px_36px_-18px_rgba(72,24,50,0.5)]">
         {overlay.label}
       </p>
     );
@@ -287,7 +287,7 @@ const PersonPage = async ({ params }: PageProps<"/people/[id]">) => {
     result.outcome === ProfileConstantsCollection.ProfileLoadOutcome.Failure
   ) {
     return (
-      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface text-brand-ink min-h-[calc(100svh-4rem)] px-4 py-12 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -319,7 +319,7 @@ const PersonPage = async ({ params }: PageProps<"/people/[id]">) => {
     "connectionId" in overlay;
 
   return (
-    <main className="bg-brand-surface text-zinc-950">
+    <main className="bg-brand-surface text-brand-ink">
       <PersonProfileDetails
         actions={messageActionIsFloating ? undefined : overlayActions}
         eyebrow={

@@ -62,7 +62,7 @@ const ChatInboxPage = async () => {
     .join("|");
 
   return (
-    <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 text-zinc-950 sm:px-6">
+    <main className="bg-brand-surface text-brand-ink min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
       <section className="mx-auto max-w-2xl">
         <p className="text-brand-700 text-xs font-bold tracking-[0.18em] uppercase">
           Your conversations

@@ -18,7 +18,7 @@ const ProfilePage = async () => {
     result = await loadViewerProfile();
   } catch (error) {
     return (
-      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface text-brand-ink min-h-[calc(100svh-4rem)] px-4 py-12 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -42,7 +42,7 @@ const ProfilePage = async () => {
     result.outcome === ProfileConstantsCollection.ProfileLoadOutcome.Failure
   ) {
     return (
-      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface text-brand-ink min-h-[calc(100svh-4rem)] px-4 py-12 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -56,7 +56,7 @@ const ProfilePage = async () => {
   const { profile } = result;
 
   return (
-    <main className="bg-brand-surface relative isolate min-h-[calc(100svh-4rem)] text-zinc-950">
+    <main className="bg-brand-surface text-brand-ink relative isolate min-h-[calc(100svh-4rem)]">
       <div
         aria-hidden="true"
         className="bg-brand-200/40 absolute top-0 left-1/2 -z-10 h-96 w-[48rem] -translate-x-1/2 rounded-full blur-3xl"
@@ -68,7 +68,7 @@ const ProfilePage = async () => {
         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
           Edit what people see
         </h1>
-        <p className="mt-4 max-w-xl leading-7 text-zinc-600">
+        <p className="text-brand-muted mt-4 max-w-xl leading-7">
           Update your basics, bio, and the details that show up on your public
           card. Save when you&apos;re done.
         </p>

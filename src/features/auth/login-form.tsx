@@ -51,7 +51,7 @@ interface PasswordLoginFormProps {
 }
 
 const INPUT_CLASS_NAME =
-  "min-h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-base text-zinc-950 outline-none transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-zinc-400 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-zinc-400 aria-invalid:border-rose-500 aria-invalid:focus:border-rose-500 disabled:cursor-wait disabled:opacity-70";
+  "border-brand-border-strong bg-brand-50/60 text-brand-ink placeholder:text-brand-subtle hover:border-brand-muted focus:border-brand-600 focus:ring-brand-600/15 focus-visible:outline-brand-600 min-h-12 w-full rounded-2xl border px-4 py-3 text-base outline-none transition focus:ring-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid aria-invalid:border-rose-500 aria-invalid:focus:border-rose-500 disabled:cursor-wait disabled:opacity-70";
 
 const LoginMessage = ({ isError, message }: LoginMessageProps) => {
   return (
@@ -76,13 +76,13 @@ const LoginModeSwitch = ({
   prompt,
 }: LoginModeSwitchProps) => {
   return (
-    <p className="text-center text-sm text-zinc-500">
+    <p className="text-brand-subtle text-center text-sm">
       {prompt}{" "}
       <button
         type="button"
         disabled={disabled}
         onClick={onSwitch}
-        className="hover:text-brand-700 focus-visible:ring-brand-600/30 font-semibold text-zinc-700 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 disabled:cursor-wait disabled:opacity-60"
+        className="text-brand-muted hover:text-brand-700 focus-visible:ring-brand-600/70 font-semibold underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 disabled:cursor-wait disabled:opacity-60"
       >
         {label}
       </button>
@@ -121,16 +121,19 @@ const OtpLoginForm = ({
         <>
           <input name="email" type="hidden" value={state.email} />
           <div className="space-y-2">
-            <p id="otp-destination" className="text-sm leading-6 text-zinc-600">
+            <p
+              id="otp-destination"
+              className="text-brand-muted text-sm leading-6"
+            >
               We sent a 6-digit code to{" "}
-              <strong className="font-semibold text-zinc-800">
+              <strong className="text-brand-ink/90 font-semibold">
                 {state.email}
               </strong>
               {"."}
             </p>
             <label
               htmlFor="otp"
-              className="block text-sm font-semibold text-zinc-800"
+              className="text-brand-ink/90 block text-sm font-semibold"
             >
               Verification code
             </label>
@@ -166,7 +169,7 @@ const OtpLoginForm = ({
             type="button"
             disabled={pending}
             onClick={() => onChangeEmail({ email: state.email })}
-            className="hover:text-brand-700 focus-visible:ring-brand-600/30 min-h-10 w-full rounded-xl text-sm font-semibold text-zinc-600 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 disabled:cursor-wait disabled:opacity-60"
+            className="text-brand-muted hover:text-brand-700 focus-visible:ring-brand-600/70 min-h-10 w-full rounded-xl text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 disabled:cursor-wait disabled:opacity-60"
           >
             Change email
           </button>
@@ -176,7 +179,7 @@ const OtpLoginForm = ({
           <div className="space-y-2">
             <label
               htmlFor="otp-email"
-              className="block text-sm font-semibold text-zinc-800"
+              className="text-brand-ink/90 block text-sm font-semibold"
             >
               Email
             </label>
@@ -243,7 +246,7 @@ const PasswordLoginForm = ({
       <div className="space-y-2">
         <label
           htmlFor="email"
-          className="block text-sm font-semibold text-zinc-800"
+          className="text-brand-ink/90 block text-sm font-semibold"
         >
           Email
         </label>
@@ -270,7 +273,7 @@ const PasswordLoginForm = ({
       <div className="space-y-2">
         <label
           htmlFor="password"
-          className="block text-sm font-semibold text-zinc-800"
+          className="text-brand-ink/90 block text-sm font-semibold"
         >
           Password
         </label>

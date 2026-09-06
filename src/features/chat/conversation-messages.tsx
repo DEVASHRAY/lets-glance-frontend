@@ -113,7 +113,7 @@ const MessageSubmitButton = ({
           event.preventDefault();
         }
       }}
-      className="bg-brand-600 hover:bg-brand-700 focus-visible:ring-brand-600/25 flex size-11 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50"
+      className="bg-brand-600 hover:bg-brand-700 shadow-brand-glow focus-visible:ring-brand-600/70 flex size-11 shrink-0 items-center justify-center rounded-full text-white transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50"
       aria-label={pending ? "Sending message" : "Send message"}
     >
       <svg
@@ -810,7 +810,7 @@ export const ConversationMessages = ({
             requestOlderMessages();
           }
         }}
-        className="bg-brand-surface/70 focus-visible:ring-brand-600/25 min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-none [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none [&::-webkit-scrollbar]:hidden"
+        className="bg-brand-50/45 focus-visible:ring-brand-600/70 min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-none [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none [&::-webkit-scrollbar]:hidden"
       >
         {optimisticMessages.length ? (
           <ol
@@ -823,11 +823,11 @@ export const ConversationMessages = ({
                   <span
                     role="status"
                     aria-live="polite"
-                    className="flex items-center gap-2 text-xs font-medium text-zinc-500"
+                    className="text-brand-subtle flex items-center gap-2 text-xs font-medium"
                   >
                     <span
                       aria-hidden="true"
-                      className="border-t-brand-600 size-3.5 animate-spin rounded-full border-2 border-zinc-300"
+                      className="border-brand-border-strong border-t-brand-600 size-3.5 animate-spin rounded-full border-2"
                     />
                     Loading older messages
                   </span>
@@ -860,14 +860,14 @@ export const ConversationMessages = ({
                   <article
                     className={
                       sentByAuthenticatedUser
-                        ? "border-brand-600/15 bg-brand-50 max-w-[82%] rounded-2xl rounded-br-md border px-3.5 py-2 text-zinc-950 shadow-sm"
-                        : "max-w-[82%] rounded-2xl rounded-bl-md border border-zinc-200 bg-white px-3.5 py-2 text-zinc-950 shadow-sm"
+                        ? "border-brand-300 bg-brand-100/75 text-brand-ink max-w-[82%] rounded-2xl rounded-br-md border px-3.5 py-2 shadow-sm"
+                        : "border-brand-border bg-brand-panel text-brand-ink max-w-[82%] rounded-2xl rounded-bl-md border px-3.5 py-2 shadow-sm"
                     }
                   >
                     <p className="whitespace-pre-wrap break-words text-sm leading-5">
                       {message.text}
                     </p>
-                    <span className="mt-1 flex items-center justify-end gap-1 text-[0.6875rem] text-zinc-400">
+                    <span className="text-brand-subtle mt-1 flex items-center justify-end gap-1 text-[0.6875rem]">
                       <MessageTimestamp
                         dateTime={message.createdAt}
                         className="shrink-0"
@@ -877,7 +877,7 @@ export const ConversationMessages = ({
                           <svg
                             aria-hidden="true"
                             viewBox="0 0 24 24"
-                            className="size-3.5 text-zinc-400"
+                            className="text-brand-subtle size-3.5"
                             fill="none"
                             stroke="currentColor"
                             strokeLinecap="round"
@@ -901,7 +901,7 @@ export const ConversationMessages = ({
           <div className="flex min-h-full items-center justify-center px-6 text-center">
             <div>
               <h2 className="text-lg font-semibold">No messages yet</h2>
-              <p className="mt-2 text-sm text-zinc-500">
+              <p className="text-brand-subtle mt-2 text-sm">
                 Start the conversation when you are ready.
               </p>
             </div>
@@ -931,7 +931,7 @@ export const ConversationMessages = ({
             textarea.focus({ preventScroll: true });
           }
         }}
-        className="shrink-0 border-t border-zinc-100 bg-white p-3"
+        className="border-brand-border bg-brand-panel shrink-0 border-t p-3"
       >
         <input type="hidden" name="connectionId" value={connectionId} />
         <input type="hidden" name="clientMessageId" value={clientMessageId} />
@@ -974,7 +974,7 @@ export const ConversationMessages = ({
             rows={1}
             enterKeyHint="send"
             placeholder="Write a message"
-            className="chat-message-textarea focus:border-brand-600/50 focus:ring-brand-600/10 max-h-32 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 leading-5 outline-none transition placeholder:text-zinc-400 focus:bg-white focus:ring-4"
+            className="chat-message-textarea border-brand-border-strong bg-brand-50/60 text-brand-ink placeholder:text-brand-subtle focus:border-brand-600 focus:bg-brand-panel focus:ring-brand-600/15 max-h-32 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border px-4 py-2.5 leading-5 outline-none transition focus:ring-4"
           />
           <MessageSubmitButton
             messageIsEmpty={!messageText.trim()}

@@ -11,7 +11,7 @@ export const LogoutSubmitButton = () => {
       aria-label={pending ? "Logging out" : "Log out"}
       disabled={pending}
       title={pending ? "Logging out…" : "Log out"}
-      className="border-brand-200/80 focus-visible:ring-brand-600/20 flex size-10 items-center justify-center rounded-xl border bg-white/75 text-zinc-600 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-60"
+      className="border-brand-border bg-brand-panel/80 text-brand-muted hover:border-brand-300 hover:bg-brand-panel hover:text-brand-ink focus-visible:ring-brand-600/70 flex size-10 items-center justify-center rounded-xl border shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-60"
     >
       {pending ? (
         <span

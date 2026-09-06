@@ -356,9 +356,9 @@ export const ConversationInbox = ({
 
   if (!conversations.length) {
     return (
-      <div className="mt-8 rounded-3xl border border-dashed border-zinc-300 bg-white/70 px-6 py-14 text-center">
+      <div className="border-brand-border-strong bg-brand-panel/75 mt-8 rounded-3xl border border-dashed px-6 py-14 text-center">
         <h2 className="text-lg font-semibold">No messages yet</h2>
-        <p className="mt-2 text-sm leading-6 text-zinc-500">
+        <p className="text-brand-subtle mt-2 text-sm leading-6">
           Your conversations will appear here after you message a connection.
         </p>
       </div>
@@ -369,7 +369,7 @@ export const ConversationInbox = ({
     <>
       <ul
         aria-label="Conversation inbox"
-        className="mt-8 overflow-hidden rounded-3xl border border-zinc-200 bg-white"
+        className="border-brand-border bg-brand-panel mt-8 overflow-hidden rounded-3xl border"
       >
         {conversations.map((conversation) => {
           const peerName = conversation.peer.name ?? "Member";
@@ -378,11 +378,11 @@ export const ConversationInbox = ({
           return (
             <li
               key={conversation.conversationId}
-              className="border-b border-zinc-100 last:border-b-0"
+              className="border-brand-border border-b last:border-b-0"
             >
               <Link
                 href={`/chat/${conversation.connectionId}`}
-                className="focus-visible:ring-brand-600/20 flex min-h-20 items-center gap-4 px-4 py-3 transition hover:bg-zinc-50 focus-visible:ring-4 focus-visible:ring-inset focus-visible:outline-none"
+                className="hover:bg-brand-50 focus-visible:ring-brand-600/70 flex min-h-20 items-center gap-4 px-4 py-3 transition focus-visible:ring-4 focus-visible:ring-inset focus-visible:outline-none"
               >
                 <ProfileAvatar
                   className="size-14 rounded-full text-base"
@@ -396,11 +396,11 @@ export const ConversationInbox = ({
                     <span className="truncate font-semibold">{peerName}</span>
                     <InboxTimestamp
                       dateTime={conversation.lastMessage.createdAt}
-                      className="shrink-0 text-xs text-zinc-400"
+                      className="text-brand-subtle shrink-0 text-xs"
                     />
                   </span>
 
-                  <span className="mt-1 flex items-center gap-1.5 text-sm text-zinc-500">
+                  <span className="text-brand-subtle mt-1 flex items-center gap-1.5 text-sm">
                     {conversation.lastMessage.sentByAuthenticatedUser &&
                     deliveryStatus ? (
                       <MessageDeliveryIcon status={deliveryStatus} />
@@ -434,11 +434,11 @@ export const ConversationInbox = ({
             <span
               role="status"
               aria-live="polite"
-              className="flex items-center gap-2 text-sm font-medium text-zinc-500"
+              className="text-brand-subtle flex items-center gap-2 text-sm font-medium"
             >
               <span
                 aria-hidden="true"
-                className="border-t-brand-600 size-4 animate-spin rounded-full border-2 border-zinc-300"
+                className="border-brand-border-strong border-t-brand-600 size-4 animate-spin rounded-full border-2"
               />
               Loading older conversations
             </span>

@@ -51,7 +51,7 @@ export const ReviewLikeForm = ({
     return (
       <p
         role="status"
-        className="rounded-full bg-white/95 px-5 py-2.5 text-sm font-semibold text-zinc-900 shadow-[0_16px_36px_-18px_rgba(15,15,15,0.55)]"
+        className="bg-brand-panel text-brand-ink rounded-full px-5 py-2.5 text-sm font-semibold shadow-[0_16px_36px_-18px_rgba(72,24,50,0.5)]"
       >
         {isMatch ? "It's a match" : "Passed"}
       </p>

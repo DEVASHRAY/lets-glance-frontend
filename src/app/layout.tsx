@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
@@ -39,13 +39,20 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: BrandConstantsCollection.ThemeColor,
+};
+
 const RootLayout = ({ children }: RootLayoutProps) => {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="bg-brand-surface text-brand-ink flex min-h-full flex-col">
+        {children}
+      </body>
     </html>
   );
 };

@@ -40,7 +40,7 @@ interface LabeledOption {
 }
 
 const SECTION_CLASS_NAME =
-  "space-y-4 rounded-[1.6rem] border border-white/80 bg-white/90 p-5 shadow-[0_18px_40px_-28px_rgba(30,41,59,0.32)]";
+  "border-brand-border bg-brand-panel/90 shadow-brand-panel space-y-4 rounded-[1.6rem] border p-5";
 
 const getLabeledOptions = ({
   labels,
@@ -151,7 +151,7 @@ export const EditProfileForm = ({ profile }: EditProfileFormProps) => {
               </p>
             </div>
           </div>
-          <p className="mt-3 text-sm leading-6 text-zinc-500">
+          <p className="text-brand-subtle mt-3 text-sm leading-6">
             This is the card other people see. Edit the fields, then save.
           </p>
         </aside>
@@ -223,11 +223,11 @@ export const EditProfileForm = ({ profile }: EditProfileFormProps) => {
               type="tel"
             />
             <div className="sm:col-span-2">
-              <p className="text-sm font-semibold text-zinc-800">Email</p>
-              <p className="mt-2 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-600">
+              <p className="text-brand-ink/90 text-sm font-semibold">Email</p>
+              <p className="border-brand-border bg-brand-50/60 text-brand-muted mt-2 rounded-2xl border px-4 py-3">
                 {profile.email}
               </p>
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="text-brand-subtle mt-2 text-xs">
                 Email is used to sign in and cannot be changed here.
               </p>
             </div>

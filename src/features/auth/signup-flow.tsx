@@ -148,7 +148,7 @@ const SIGNUP_STEP_ORDER: SignupStep[] = [
 const SIGNUP_STEP_COUNT = SIGNUP_STEP_ORDER.length - 1;
 
 const INPUT_CLASS_NAME =
-  "focus:border-brand-600 focus:ring-brand-600/10 min-h-14 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 hover:border-zinc-300 focus:ring-4 aria-invalid:border-rose-500 aria-invalid:ring-rose-500/10 disabled:cursor-wait disabled:bg-zinc-100 disabled:text-zinc-500";
+  "border-brand-border-strong bg-brand-panel text-brand-ink placeholder:text-brand-subtle hover:border-brand-muted focus:border-brand-600 focus:ring-brand-600/15 min-h-14 w-full rounded-2xl border px-4 py-3 text-base shadow-sm outline-none transition focus:ring-4 aria-invalid:border-rose-500 aria-invalid:ring-rose-500/10 disabled:cursor-wait disabled:bg-brand-100/60 disabled:text-brand-subtle";
 
 const GENDER_LABEL = {
   [ProfileConstantsCollection.UserGender.Female]: "Woman",
@@ -273,14 +273,14 @@ const ChoiceInput = ({
     <label
       className={
         checked
-          ? "border-brand-600 bg-brand-50 text-brand-700 focus-within:ring-brand-600/10 group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left shadow-[0_12px_30px_-22px_rgba(79,70,229,0.7)] transition focus-within:ring-4"
-          : "focus-within:border-brand-600 focus-within:ring-brand-600/10 group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-left text-zinc-700 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md focus-within:ring-4"
+          ? "border-brand-600 bg-brand-50 text-brand-700 focus-within:ring-brand-600/70 group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left shadow-brand-glow transition focus-within:ring-4"
+          : "border-brand-border-strong bg-brand-panel text-brand-muted focus-within:border-brand-600 focus-within:ring-brand-600/70 group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand-muted hover:shadow-md focus-within:ring-4"
       }
     >
       <span className="min-w-0">
         <span className="block text-sm font-semibold">{label}</span>
         {description ? (
-          <span className="mt-0.5 block text-xs leading-5 text-zinc-500">
+          <span className="text-brand-subtle mt-0.5 block text-xs leading-5">
             {description}
           </span>
         ) : null}
@@ -298,7 +298,7 @@ const ChoiceInput = ({
         className={
           checked
             ? "bg-brand-600 flex size-5 shrink-0 items-center justify-center rounded-full text-white"
-            : "size-5 shrink-0 rounded-full border-2 border-zinc-300 bg-white"
+            : "border-brand-border-strong bg-brand-panel size-5 shrink-0 rounded-full border-2"
         }
       >
         {checked ? (
@@ -334,11 +334,11 @@ const StepIntro = ({
         ref={headingRef}
         id="signup-step-heading"
         tabIndex={-1}
-        className="mt-3 text-3xl leading-tight font-semibold tracking-[-0.045em] text-zinc-950 outline-none sm:text-4xl lg:text-5xl"
+        className="text-brand-ink mt-3 text-3xl leading-tight font-semibold tracking-[-0.045em] outline-none sm:text-4xl lg:text-5xl"
       >
         {title}
       </h1>
-      <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-600 sm:text-base sm:leading-7">
+      <p className="text-brand-muted mt-3 max-w-xl text-sm leading-6 sm:text-base sm:leading-7">
         {description}
       </p>
     </div>
@@ -373,19 +373,19 @@ const ProfilePreview = ({ draft }: ProfilePreviewProps) => {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-4">
-        <p className="text-xs font-bold tracking-[0.18em] text-zinc-500 uppercase">
+        <p className="text-brand-subtle text-xs font-bold tracking-[0.18em] uppercase">
           Live profile preview
         </p>
       </div>
-      <article className="relative overflow-hidden rounded-[2rem] bg-zinc-950 text-white shadow-[0_36px_90px_-32px_rgba(30,41,59,0.55)]">
-        <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(circle_at_30%_20%,#93c5fd_0%,#4f46e5_34%,#2563eb_72%,#172554_100%)]">
+      <article className="bg-brand-900 shadow-brand-panel relative overflow-hidden rounded-[2rem] text-white">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(circle_at_30%_20%,var(--color-brand-300)_0%,var(--color-brand-600)_38%,var(--color-brand-accent-600)_72%,var(--color-brand-900)_100%)]">
           <div
             aria-hidden="true"
             className="absolute -top-12 -right-10 size-52 rounded-full border border-white/20 bg-white/10 blur-sm"
           />
           <div
             aria-hidden="true"
-            className="absolute bottom-16 -left-12 size-44 rounded-full border border-white/15 bg-zinc-950/15"
+            className="bg-brand-900/20 absolute bottom-16 -left-12 size-44 rounded-full border border-white/15"
           />
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="flex size-32 items-center justify-center rounded-full border border-white/25 bg-white/15 text-6xl font-semibold shadow-2xl backdrop-blur-md">
@@ -467,7 +467,7 @@ const SignupSubmitButton = ({
     <button
       type="submit"
       disabled={disabled || pending}
-      className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/25 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(79,70,229,0.68)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(79,70,229,0.82)] focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-65 disabled:hover:translate-y-0"
+      className="from-brand-600 to-brand-accent-600 shadow-brand-glow focus-visible:ring-brand-600/70 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-65 disabled:hover:translate-y-0"
     >
       {pending ? (
         <>
@@ -539,7 +539,7 @@ const OptionalStepActions = ({
       <button
         type="button"
         onClick={onSkip}
-        className="min-h-11 w-full rounded-xl px-4 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-200"
+        className="text-brand-subtle hover:bg-brand-50 hover:text-brand-ink/90 focus-visible:ring-brand-600/70 min-h-11 w-full rounded-xl px-4 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
       >
         Skip for now
       </button>
@@ -834,7 +834,7 @@ export const SignupFlow = () => {
       action={formAction}
       aria-busy={isPending || state.success}
       onSubmit={(event) => handleSignupSubmit({ event })}
-      className="bg-brand-surface relative isolate min-h-svh overflow-x-hidden text-zinc-950"
+      className="bg-brand-surface text-brand-ink relative isolate min-h-svh overflow-x-hidden"
     >
       <HiddenProfileFields draft={draft} mode={mode} session={signupSession} />
 
@@ -850,16 +850,16 @@ export const SignupFlow = () => {
       <header className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
         <Link
           href="/login"
-          className="focus-visible:ring-brand-600/20 flex min-h-11 items-center gap-2.5 rounded-xl pr-3 font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-4"
+          className="focus-visible:ring-brand-600/70 flex min-h-11 items-center gap-2.5 rounded-xl pr-3 font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-4"
         >
-          <BrandMark className="shadow-brand-600/20 size-9 shadow-lg" />
+          <BrandMark className="shadow-brand-glow size-10" />
           {BrandConstantsCollection.DisplayName}
         </Link>
 
         {step === SignupStep.Hook ? (
           <Link
             href="/login"
-            className="focus-visible:ring-brand-600/15 flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4"
+            className="text-brand-muted hover:bg-brand-panel hover:text-brand-ink focus-visible:ring-brand-600/70 flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
           >
             Log in
           </Link>
@@ -868,7 +868,7 @@ export const SignupFlow = () => {
             type="button"
             disabled={isPending || state.success}
             onClick={goBack}
-            className="focus-visible:ring-brand-600/15 flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50"
+            className="text-brand-muted hover:bg-brand-panel hover:text-brand-ink focus-visible:ring-brand-600/70 flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50"
           >
             <span aria-hidden="true">←</span>
             Back
@@ -880,7 +880,7 @@ export const SignupFlow = () => {
         <div className="relative z-20 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12">
           <div
             aria-hidden="true"
-            className="flex items-center justify-between text-xs font-semibold text-zinc-500"
+            className="text-brand-subtle flex items-center justify-between text-xs font-semibold"
           >
             <span>Signup progress</span>
             <span>
@@ -894,7 +894,7 @@ export const SignupFlow = () => {
             aria-valuemin={0}
             aria-valuenow={stepIndex}
             aria-valuetext={`Step ${String(stepIndex)} of ${String(SIGNUP_STEP_COUNT)}`}
-            className="pointer-events-none mt-2 h-0.5 w-full overflow-hidden bg-zinc-300"
+            className="bg-brand-border pointer-events-none mt-2 h-0.5 w-full overflow-hidden"
           >
             <div
               aria-hidden="true"
@@ -929,12 +929,12 @@ export const SignupFlow = () => {
                   ].map(([number, label]) => (
                     <div
                       key={number}
-                      className="rounded-2xl border border-white bg-white/75 p-4 shadow-sm backdrop-blur-sm"
+                      className="border-brand-border bg-brand-panel/80 rounded-2xl border p-4 shadow-sm backdrop-blur-sm"
                     >
                       <span className="text-brand-700 text-xs font-bold">
                         {number}
                       </span>
-                      <p className="mt-2 text-sm font-semibold text-zinc-800">
+                      <p className="text-brand-ink/90 mt-2 text-sm font-semibold">
                         {label}
                       </p>
                     </div>
@@ -1006,9 +1006,9 @@ export const SignupFlow = () => {
                       aria-describedby={hint ? "signup-message" : undefined}
                       aria-invalid={Boolean(
                         hint &&
-                        (draft.age < 18 ||
-                          draft.age > 120 ||
-                          !Number.isInteger(draft.age)),
+                          (draft.age < 18 ||
+                            draft.age > 120 ||
+                            !Number.isInteger(draft.age)),
                       )}
                       className={INPUT_CLASS_NAME}
                     />
@@ -1354,8 +1354,8 @@ export const SignupFlow = () => {
                           }
                           aria-invalid={Boolean(
                             visibleActionMessage &&
-                            state.field ===
-                              SignupConstantsCollection.SignupActionField.Otp,
+                              state.field ===
+                                SignupConstantsCollection.SignupActionField.Otp,
                           )}
                           className={`${INPUT_CLASS_NAME} text-center text-xl font-semibold tracking-[0.45em] tabular-nums`}
                         />
@@ -1369,7 +1369,7 @@ export const SignupFlow = () => {
                           <button
                             type="button"
                             onClick={changeOtpEmail}
-                            className="min-h-11 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-200"
+                            className="text-brand-muted hover:bg-brand-panel focus-visible:ring-brand-600/70 min-h-11 rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
                           >
                             Change email
                           </button>
@@ -1378,7 +1378,7 @@ export const SignupFlow = () => {
                             name="resendOtp"
                             value="true"
                             formNoValidate
-                            className="text-brand-700 hover:bg-brand-50 focus-visible:ring-brand-600/15 min-h-11 rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
+                            className="text-brand-700 hover:bg-brand-50 focus-visible:ring-brand-600/70 min-h-11 rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
                           >
                             Send code again
                           </button>
@@ -1417,8 +1417,9 @@ export const SignupFlow = () => {
                           }
                           aria-invalid={Boolean(
                             visibleActionMessage &&
-                            state.field ===
-                              SignupConstantsCollection.SignupActionField.Email,
+                              state.field ===
+                                SignupConstantsCollection.SignupActionField
+                                  .Email,
                           )}
                           className={INPUT_CLASS_NAME}
                         />
@@ -1462,8 +1463,9 @@ export const SignupFlow = () => {
                           }
                           aria-invalid={Boolean(
                             visibleActionMessage &&
-                            state.field ===
-                              SignupConstantsCollection.SignupActionField.Email,
+                              state.field ===
+                                SignupConstantsCollection.SignupActionField
+                                  .Email,
                           )}
                           className={INPUT_CLASS_NAME}
                         />
@@ -1498,9 +1500,9 @@ export const SignupFlow = () => {
                             }
                             aria-invalid={Boolean(
                               visibleActionMessage &&
-                              state.field ===
-                                SignupConstantsCollection.SignupActionField
-                                  .Password,
+                                state.field ===
+                                  SignupConstantsCollection.SignupActionField
+                                    .Password,
                             )}
                             className={`${INPUT_CLASS_NAME} pr-20`}
                           />
@@ -1511,7 +1513,7 @@ export const SignupFlow = () => {
                                 (currentVisibility) => !currentVisibility,
                               )
                             }
-                            className="absolute inset-y-0 right-2 my-auto min-h-10 rounded-xl px-3 text-xs font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-200"
+                            className="text-brand-subtle hover:bg-brand-50 hover:text-brand-ink/90 focus-visible:ring-brand-600/70 absolute inset-y-0 right-2 my-auto min-h-10 rounded-xl px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-4"
                             aria-label={
                               passwordVisible
                                 ? "Hide password"
@@ -1592,7 +1594,7 @@ export const SignupFlow = () => {
                         ? showPasswordSignup
                         : showOtpSignup
                     }
-                    className="text-brand-700 focus-visible:ring-brand-600/15 min-h-11 rounded-lg px-2 font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50"
+                    className="text-brand-700 focus-visible:ring-brand-600/70 min-h-11 rounded-lg px-2 font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50"
                   >
                     {mode === SignupConstantsCollection.SignupMode.Otp
                       ? "Use a password"
@@ -1604,7 +1606,7 @@ export const SignupFlow = () => {
               <OptionalStepActions onSkip={skipOptionalStep}>
                 <button
                   type="submit"
-                  className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/25 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(79,70,229,0.68)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(79,70,229,0.82)] focus-visible:outline-none focus-visible:ring-4"
+                  className="from-brand-600 to-brand-accent-600 shadow-brand-glow focus-visible:ring-brand-600/70 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4"
                 >
                   {getStepActionLabel({ step })}
                   <span
@@ -1619,7 +1621,7 @@ export const SignupFlow = () => {
               <div className="space-y-3">
                 <button
                   type="submit"
-                  className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/25 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(79,70,229,0.68)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(79,70,229,0.82)] focus-visible:outline-none focus-visible:ring-4"
+                  className="from-brand-600 to-brand-accent-600 shadow-brand-glow focus-visible:ring-brand-600/70 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4"
                 >
                   {step === SignupStep.Hook && resumeStep
                     ? "Continue my profile"
@@ -1636,7 +1638,7 @@ export const SignupFlow = () => {
                     type="button"
                     onClick={discardSavedDraft}
                     aria-label="Discard saved signup draft and start over"
-                    className="min-h-11 w-full rounded-xl px-4 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-100/70 hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-200"
+                    className="text-brand-subtle hover:bg-brand-50 hover:text-brand-ink/90 focus-visible:ring-brand-600/70 min-h-11 w-full rounded-xl px-4 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
                   >
                     Start over
                   </button>

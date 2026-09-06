@@ -37,7 +37,7 @@ const HeaderLink = ({ children, href, icon }: HeaderLinkProps) => {
       className={
         isActive
           ? "bg-brand-50 text-brand-700 flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold"
-          : "flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950"
+          : "text-brand-subtle hover:bg-brand-100/70 hover:text-brand-ink flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold transition"
       }
     >
       {icon}
@@ -57,14 +57,14 @@ export const AppHeader = ({ viewer }: AppHeaderProps) => {
     pathname === "/profile" || pathname.startsWith("/profile/");
 
   return (
-    <header className="chat-viewport-header border-brand-200/70 bg-brand-50/85 supports-[backdrop-filter]:bg-brand-50/75 sticky top-0 z-50 border-b shadow-[0_1px_0_rgba(79,70,229,0.04)] backdrop-blur-xl">
+    <header className="chat-viewport-header border-brand-border bg-brand-50/90 supports-[backdrop-filter]:bg-brand-50/80 sticky top-0 z-50 border-b shadow-[0_1px_0_rgba(199,44,82,0.08)] backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link
           href="/feed"
           aria-label={`${BrandConstantsCollection.DisplayName} home`}
-          className="focus-visible:ring-brand-600/20 flex shrink-0 items-center gap-3 font-bold tracking-[-0.02em] focus-visible:rounded-xl focus-visible:outline-none focus-visible:ring-4"
+          className="focus-visible:ring-brand-600/70 flex shrink-0 items-center gap-3 font-bold tracking-[-0.02em] focus-visible:rounded-xl focus-visible:outline-none focus-visible:ring-4"
         >
-          <BrandMark className="size-9 shrink-0 shadow-[0_8px_20px_-8px_rgba(79,70,229,0.65)]" />
+          <BrandMark className="shadow-brand-glow size-9 shrink-0" />
           <span className="hidden sm:inline">
             {BrandConstantsCollection.DisplayName}
           </span>
@@ -73,7 +73,7 @@ export const AppHeader = ({ viewer }: AppHeaderProps) => {
         {isPersonDetails ? null : (
           <nav
             aria-label="Primary navigation"
-            className="border-brand-200/70 flex items-center rounded-2xl border bg-white/65 p-1 shadow-sm"
+            className="border-brand-border bg-brand-panel/70 flex items-center rounded-2xl border p-1 shadow-sm"
           >
             <HeaderLink
               href="/feed"
@@ -146,8 +146,8 @@ export const AppHeader = ({ viewer }: AppHeaderProps) => {
             aria-current={isProfileActive ? "page" : undefined}
             className={
               isProfileActive
-                ? "flex size-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-sm"
-                : "border-brand-200/80 focus-visible:ring-brand-600/20 flex size-10 items-center justify-center rounded-full border bg-white/75 text-zinc-600 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4"
+                ? "bg-brand-800 flex size-10 items-center justify-center rounded-full text-white shadow-sm"
+                : "border-brand-border bg-brand-panel/80 text-brand-muted hover:border-brand-300 hover:bg-brand-panel hover:text-brand-ink focus-visible:ring-brand-600/70 flex size-10 items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4"
             }
           >
             {viewer ? (
@@ -182,7 +182,7 @@ export const AppHeader = ({ viewer }: AppHeaderProps) => {
           {logoutState.message ? (
             <p
               role="alert"
-              className="absolute top-12 right-0 w-56 rounded-xl border border-rose-200 bg-white px-4 py-3 text-xs font-medium text-rose-700 shadow-xl"
+              className="bg-brand-panel absolute top-12 right-0 w-56 rounded-xl border border-rose-200 px-4 py-3 text-xs font-medium text-rose-700 shadow-xl"
             >
               {logoutState.message}
             </p>

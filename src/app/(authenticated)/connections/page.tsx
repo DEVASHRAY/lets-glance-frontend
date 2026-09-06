@@ -63,8 +63,8 @@ const ConnectionTab = ({ active, children, href }: ConnectionTabProps) => {
       aria-current={active ? "page" : undefined}
       className={
         active
-          ? "rounded-xl bg-zinc-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm"
-          : "rounded-xl px-4 py-2.5 text-sm font-semibold text-zinc-500 transition hover:bg-white hover:text-zinc-950"
+          ? "bg-brand-800 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm"
+          : "text-brand-subtle hover:bg-brand-panel hover:text-brand-ink rounded-xl px-4 py-2.5 text-sm font-semibold transition"
       }
     >
       {children}
@@ -123,7 +123,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
     });
   } catch (error) {
     return (
-      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface text-brand-ink min-h-[calc(100svh-4rem)] px-4 py-12 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -148,7 +148,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
     ConnectionsConstantsCollection.ConnectionsLoadOutcome.Failure
   ) {
     return (
-      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface text-brand-ink min-h-[calc(100svh-4rem)] px-4 py-12 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -164,7 +164,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
   });
 
   return (
-    <main className="bg-brand-surface relative isolate min-h-[calc(100svh-4rem)] overflow-hidden px-4 py-10 text-zinc-950 sm:px-6 sm:py-14">
+    <main className="bg-brand-surface text-brand-ink relative isolate min-h-[calc(100svh-4rem)] overflow-hidden px-4 py-10 sm:px-6 sm:py-14">
       <div
         aria-hidden="true"
         className="bg-brand-200/40 absolute top-0 left-1/2 -z-10 h-96 w-[48rem] -translate-x-1/2 rounded-full blur-3xl"
@@ -177,14 +177,14 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
           Connections
         </h1>
-        <p className="mt-4 max-w-xl leading-7 text-zinc-600">
+        <p className="text-brand-muted mt-4 max-w-xl leading-7">
           Keep up with the people you&apos;ve noticed and the connections
           you&apos;ve made.
         </p>
 
         <nav
           aria-label="Connection categories"
-          className="mt-8 inline-flex flex-wrap rounded-2xl border border-zinc-200/80 bg-white/60 p-1.5 shadow-sm backdrop-blur"
+          className="border-brand-border bg-brand-panel/70 mt-8 inline-flex flex-wrap rounded-2xl border p-1.5 shadow-sm backdrop-blur"
         >
           <ConnectionTab
             active={
@@ -243,7 +243,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
                         href={`/chat/${connection.connectionId}`}
                         prefetch={false}
                         aria-label={`Message ${connection.profile.name}`}
-                        className="bg-brand-600 hover:bg-brand-700 focus-visible:ring-brand-600/30 inline-flex size-10 items-center justify-center gap-1.5 rounded-full text-xs font-semibold text-white shadow-sm transition focus-visible:outline-none focus-visible:ring-4 sm:h-9 sm:w-auto sm:px-3"
+                        className="bg-brand-600 hover:bg-brand-700 focus-visible:ring-brand-600/70 inline-flex size-10 items-center justify-center gap-1.5 rounded-full text-xs font-semibold text-white shadow-sm transition focus-visible:outline-none focus-visible:ring-4 sm:h-9 sm:w-auto sm:px-3"
                       >
                         <svg
                           aria-hidden="true"
@@ -267,10 +267,10 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
             })}
           </ul>
         ) : (
-          <div className="mt-10 rounded-[2rem] border border-dashed border-zinc-300 bg-white/65 px-6 py-16 text-center backdrop-blur">
-            <BrandMark className="mx-auto size-14 shadow-lg shadow-indigo-500/15" />
+          <div className="border-brand-border-strong bg-brand-panel/70 mt-10 rounded-[2rem] border border-dashed px-6 py-16 text-center backdrop-blur">
+            <BrandMark className="shadow-brand-glow mx-auto size-14" />
             <h2 className="mt-5 text-xl font-semibold">{emptyState.title}</h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-zinc-500">
+            <p className="text-brand-subtle mx-auto mt-2 max-w-sm text-sm leading-6">
               {emptyState.message}
             </p>
           </div>

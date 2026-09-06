@@ -371,12 +371,12 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
   if (!profiles.length) {
     return (
       <div className="flex min-h-[34rem] items-center justify-center px-4">
-        <div className="max-w-md rounded-[2rem] border border-white/70 bg-white/75 p-10 text-center shadow-[0_30px_90px_-45px_rgba(30,41,59,0.35)] backdrop-blur-xl">
-          <BrandMark className="mx-auto size-16 shadow-lg shadow-indigo-500/20" />
+        <div className="border-brand-border bg-brand-panel/80 shadow-brand-panel max-w-md rounded-[2rem] border p-10 text-center backdrop-blur-xl">
+          <BrandMark className="shadow-brand-glow mx-auto size-16" />
           <h2 className="mt-6 text-2xl font-semibold tracking-tight">
             You&apos;ve explored enough for today
           </h2>
-          <p className="mt-3 leading-7 text-zinc-600">
+          <p className="text-brand-muted mt-3 leading-7">
             Come back tomorrow for a fresh collection of people to discover.
           </p>
         </div>
@@ -387,7 +387,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
   if (!currentProfile) {
     return (
       <div className="flex min-h-[34rem] items-center justify-center px-4">
-        <div className="max-w-md rounded-[2rem] border border-white/70 bg-white/80 p-10 text-center shadow-[0_30px_90px_-45px_rgba(30,41,59,0.35)] backdrop-blur-xl">
+        <div className="border-brand-border bg-brand-panel/85 shadow-brand-panel max-w-md rounded-[2rem] border p-10 text-center backdrop-blur-xl">
           <span
             aria-hidden="true"
             className="bg-brand-50 text-brand-600 mx-auto flex size-16 items-center justify-center rounded-full text-3xl"
@@ -397,7 +397,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
           <h2 className="mt-6 text-2xl font-semibold tracking-tight">
             {isSwipePending ? "Saving your choice…" : "Finding someone new…"}
           </h2>
-          <p className="mt-3 leading-7 text-zinc-600">
+          <p className="text-brand-muted mt-3 leading-7">
             {isSwipePending
               ? "Your final decision is being stored."
               : "Hang tight while we look for more people you might like."}
@@ -439,13 +439,13 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
               onPointerMove={isTopCard ? handlePointerMove : undefined}
               onPointerUp={isTopCard ? handlePointerUp : undefined}
               onTransitionEnd={isTopCard ? handleCardTransitionEnd : undefined}
-              className={`absolute inset-0 overflow-hidden rounded-[2.25rem] border border-white/80 bg-zinc-900 shadow-[0_38px_100px_-36px_rgba(30,41,59,0.62)] select-none ${
+              className={`absolute inset-0 overflow-hidden rounded-[2.25rem] border border-white/80 bg-zinc-900 shadow-[0_38px_100px_-36px_rgba(72,24,50,0.62)] select-none ${
                 isTopCard ? "touch-pan-y" : ""
               } ${
                 isDragging && isTopCard
                   ? "cursor-grabbing"
                   : "cursor-pointer transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
-              } focus-visible:ring-brand-600/35 focus-visible:outline-none focus-visible:ring-4`}
+              } focus-visible:ring-brand-600/70 focus-visible:outline-none focus-visible:ring-4`}
               style={{
                 opacity: 1 - position * 0.16,
                 pointerEvents: isTopCard ? "auto" : "none",
@@ -523,7 +523,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
         })}
       </div>
 
-      <div className="relative z-40 -mt-6 flex items-center rounded-[1.6rem] border border-white/80 bg-white/85 p-2 shadow-[0_22px_55px_-24px_rgba(30,41,59,0.58)] backdrop-blur-xl">
+      <div className="border-brand-border bg-brand-panel/90 shadow-brand-panel relative z-40 -mt-6 flex items-center rounded-[1.6rem] border p-2 backdrop-blur-xl">
         <button
           type="button"
           aria-label={`Move past ${currentProfile.name}`}
@@ -533,7 +533,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
               direction: FeedConstantsCollection.SwipeDirection.Left,
             })
           }
-          className="group flex size-12 items-center justify-center rounded-[1.1rem] bg-zinc-100 text-zinc-500 transition duration-200 hover:bg-zinc-950 hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-400/25 disabled:cursor-wait disabled:opacity-50 sm:size-14"
+          className="bg-brand-100 text-brand-muted hover:bg-brand-ink focus-visible:ring-brand-600/70 group flex size-12 items-center justify-center rounded-[1.1rem] transition duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50 sm:size-14"
         >
           <span
             aria-hidden="true"
@@ -542,7 +542,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
             ✕
           </span>
         </button>
-        <span aria-hidden="true" className="mx-2 h-7 w-px bg-zinc-200" />
+        <span aria-hidden="true" className="bg-brand-border mx-2 h-7 w-px" />
         <button
           type="button"
           aria-label={`Continue with ${currentProfile.name}`}
@@ -552,7 +552,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
               direction: FeedConstantsCollection.SwipeDirection.Right,
             })
           }
-          className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/30 group flex size-12 items-center justify-center rounded-[1.1rem] bg-gradient-to-br text-xl text-white shadow-[0_12px_26px_-12px_rgba(79,70,229,0.72)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-12px_rgba(79,70,229,0.86)] focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50 sm:size-14"
+          className="from-brand-600 to-brand-accent-600 shadow-brand-glow focus-visible:ring-brand-600/70 group flex size-12 items-center justify-center rounded-[1.1rem] bg-gradient-to-br text-xl text-white transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50 sm:size-14"
         >
           <span
             aria-hidden="true"
@@ -565,7 +565,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
 
       <Link
         href={`/people/${currentProfile.id}`}
-        className="text-brand-700 hover:text-brand-600 focus-visible:ring-brand-600/20 relative z-40 mt-5 rounded-lg px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
+        className="text-brand-700 hover:text-brand-600 focus-visible:ring-brand-600/70 relative z-40 mt-5 rounded-lg px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
       >
         View profile
       </Link>
@@ -578,7 +578,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
           {swipeError}
         </p>
       ) : (
-        <p role="status" className="mt-5 text-center text-xs text-zinc-500">
+        <p role="status" className="text-brand-subtle mt-5 text-center text-xs">
           {isSwipePending
             ? "Saving your choice…"
             : "Your choices are saved securely."}

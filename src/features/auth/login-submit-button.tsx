@@ -17,7 +17,7 @@ export const LoginSubmitButton = ({
     <button
       type="submit"
       disabled={pending}
-      className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/25 group relative flex min-h-12 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r px-5 py-3 font-semibold text-white shadow-[0_14px_30px_-14px_rgba(79,70,229,0.7)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-14px_rgba(79,70,229,0.82)] focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0"
+      className="from-brand-600 to-brand-accent-600 shadow-brand-glow focus-visible:ring-brand-600/70 group relative flex min-h-12 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r px-5 py-3 font-semibold text-white transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0"
     >
       {pending ? (
         <>

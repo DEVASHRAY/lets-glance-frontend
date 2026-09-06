@@ -15,12 +15,12 @@ const FeedLoading = () => {
       aria-live="polite"
       className="mx-auto flex w-full max-w-[29rem] animate-pulse flex-col items-center"
     >
-      <div className="relative h-[min(62svh,38rem)] min-h-[31rem] w-full overflow-hidden rounded-[2.25rem] border border-white/80 bg-zinc-200 shadow-[0_38px_100px_-36px_rgba(30,41,59,0.35)]">
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-200 via-indigo-100 to-blue-100" />
+      <div className="border-brand-border bg-brand-100 relative h-[min(62svh,38rem)] min-h-[31rem] w-full overflow-hidden rounded-[2.25rem] border shadow-[0_38px_100px_-36px_rgba(72,24,50,0.35)]">
+        <div className="from-brand-100 via-brand-200 to-brand-accent-100 absolute inset-0 bg-gradient-to-br" />
         <div className="absolute right-7 bottom-8 left-7">
-          <div className="h-5 w-24 rounded-full bg-white/45" />
-          <div className="mt-4 h-12 w-52 rounded-2xl bg-white/60" />
-          <div className="mt-3 h-4 w-64 max-w-full rounded-full bg-white/40" />
+          <div className="bg-brand-panel/55 h-5 w-24 rounded-full" />
+          <div className="bg-brand-panel/70 mt-4 h-12 w-52 rounded-2xl" />
+          <div className="bg-brand-panel/50 mt-3 h-4 w-64 max-w-full rounded-full" />
         </div>
       </div>
       <div aria-hidden="true" className="h-20 shrink-0 sm:h-[5.25rem]" />
@@ -31,11 +31,11 @@ const FeedLoading = () => {
 
 const FeedPage = () => {
   return (
-    <main className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden bg-[linear-gradient(110deg,var(--color-brand-50)_0%,var(--color-brand-surface)_52%,var(--color-brand-accent-50)_100%)] text-zinc-950">
+    <main className="text-brand-ink relative isolate min-h-[calc(100svh-4rem)] overflow-hidden bg-[linear-gradient(110deg,var(--color-brand-50)_0%,var(--color-brand-surface)_52%,var(--color-brand-accent-50)_100%)]">
       <section className="relative min-h-[calc(100svh-4rem)] px-4 py-7 sm:px-6 sm:py-10">
         <div
           aria-hidden="true"
-          className="absolute top-1/2 left-1/2 -z-20 h-[52rem] w-[52rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.18),rgba(248,250,252,0)_68%)]"
+          className="absolute top-1/2 left-1/2 -z-20 h-[52rem] w-[52rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(199,44,82,0.18),rgba(255,248,246,0)_68%)]"
         />
         <div
           aria-hidden="true"
@@ -48,7 +48,7 @@ const FeedPage = () => {
 
         <div className="mx-auto grid w-full max-w-6xl items-center gap-8 lg:min-h-[calc(100svh-9rem)] lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
           <div className="mx-auto max-w-md text-center lg:mx-0 lg:text-left">
-            <div className="text-brand-700 border-brand-600/15 inline-flex items-center gap-2 rounded-full border bg-white/70 px-4 py-2 text-xs font-bold tracking-[0.18em] uppercase shadow-sm backdrop-blur">
+            <div className="text-brand-700 border-brand-border bg-brand-panel/75 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold tracking-[0.18em] uppercase shadow-sm backdrop-blur">
               <span className="bg-brand-600 size-1.5 rounded-full" />
               Curated for you
             </div>
@@ -58,7 +58,7 @@ const FeedPage = () => {
                 One moment.
               </span>
             </h1>
-            <p className="mx-auto mt-5 max-w-sm text-base leading-7 text-zinc-600 lg:mx-0 lg:text-lg">
+            <p className="text-brand-muted mx-auto mt-5 max-w-sm text-base leading-7 lg:mx-0 lg:text-lg">
               Slow down and discover the person in front of you. Move when
               you&apos;re ready.
             </p>

@@ -20,7 +20,7 @@ const LoginPage = () => {
     : undefined;
 
   return (
-    <main className="bg-brand-surface relative isolate min-h-svh flex-1 overflow-hidden text-zinc-950">
+    <main className="bg-brand-surface text-brand-ink relative isolate min-h-svh flex-1 overflow-hidden">
       <div
         aria-hidden="true"
         className="bg-brand-400/20 absolute -top-40 -left-40 size-96 rounded-full blur-3xl"
@@ -36,7 +36,7 @@ const LoginPage = () => {
           className="hidden flex-col justify-between px-12 py-12 lg:flex xl:px-20 xl:py-16"
         >
           <div className="flex items-center gap-3 text-lg font-bold tracking-tight">
-            <BrandMark className="shadow-brand-600/20 size-10 shadow-lg" />
+            <BrandMark className="shadow-brand-glow size-12" />
             {BrandConstantsCollection.DisplayName}
           </div>
 
@@ -53,13 +53,13 @@ const LoginPage = () => {
                 A better hello.
               </span>
             </h2>
-            <p className="mt-7 max-w-lg text-lg leading-8 text-zinc-600">
+            <p className="text-brand-muted mt-7 max-w-lg text-lg leading-8">
               Thoughtful profiles make it easier to notice someone and start a
               conversation without the noise.
             </p>
           </div>
 
-          <p className="text-sm text-zinc-500">
+          <p className="text-brand-subtle text-sm">
             Take a glance. Find a reason to say hello.
           </p>
         </section>
@@ -70,11 +70,11 @@ const LoginPage = () => {
         >
           <div className="w-full max-w-md">
             <div className="mb-8 flex items-center gap-3 text-lg font-bold tracking-tight lg:hidden">
-              <BrandMark className="shadow-brand-600/20 size-10 shadow-lg" />
+              <BrandMark className="shadow-brand-glow size-11" />
               {BrandConstantsCollection.DisplayName}
             </div>
 
-            <div className="rounded-[2rem] border border-white bg-white p-6 shadow-[0_30px_80px_-30px_rgba(30,41,59,0.28)] sm:p-10">
+            <div className="border-brand-border bg-brand-panel shadow-brand-panel rounded-[2rem] border p-6 sm:p-10">
               <p className="text-brand-700 text-sm font-bold tracking-[0.18em] uppercase">
                 Welcome back
               </p>
@@ -84,18 +84,18 @@ const LoginPage = () => {
               >
                 Log in to continue
               </h1>
-              <p className="mt-3 leading-7 text-zinc-600">
+              <p className="text-brand-muted mt-3 leading-7">
                 Your next great conversation could be one sign-in away.
               </p>
               <LoginForm
                 defaultEmail={defaultEmail}
                 defaultPassword={defaultPassword}
               />
-              <p className="mt-6 text-center text-sm text-zinc-500">
+              <p className="text-brand-subtle mt-6 text-center text-sm">
                 New here?{" "}
                 <Link
                   href="/signup"
-                  className="hover:text-brand-700 font-medium text-zinc-700 underline-offset-4 hover:underline"
+                  className="text-brand-muted hover:text-brand-700 font-medium underline-offset-4 hover:underline"
                 >
                   Sign up
                 </Link>

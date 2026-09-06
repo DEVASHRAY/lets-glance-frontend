@@ -57,7 +57,7 @@ interface InterestCheckboxGroupProps {
 }
 
 const CONTROL_CLASS_NAME =
-  "focus:border-brand-600 focus:ring-brand-600/10 min-h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-base text-zinc-950 outline-none transition placeholder:text-zinc-400 hover:border-zinc-300 focus:bg-white focus:ring-4";
+  "border-brand-border-strong bg-brand-50/60 text-brand-ink placeholder:text-brand-subtle hover:border-brand-muted focus:border-brand-600 focus:bg-brand-panel focus:ring-brand-600/15 min-h-12 w-full rounded-2xl border px-4 py-3 text-base outline-none transition focus:ring-4";
 
 export const FieldShell = ({
   children,
@@ -69,12 +69,12 @@ export const FieldShell = ({
     <div className="space-y-2">
       <label
         htmlFor={htmlFor}
-        className="block text-sm font-semibold text-zinc-800"
+        className="text-brand-ink/90 block text-sm font-semibold"
       >
         {label}
       </label>
       {children}
-      {hint ? <p className="text-xs text-zinc-500">{hint}</p> : null}
+      {hint ? <p className="text-brand-subtle text-xs">{hint}</p> : null}
     </div>
   );
 };
@@ -165,12 +165,14 @@ export const InterestCheckboxGroup = ({
 }: InterestCheckboxGroupProps) => {
   return (
     <fieldset className="space-y-2 sm:col-span-2">
-      <legend className="text-sm font-semibold text-zinc-800">{legend}</legend>
+      <legend className="text-brand-ink/90 text-sm font-semibold">
+        {legend}
+      </legend>
       <div className="flex flex-wrap gap-2">
         {options.map((option) => (
           <label
             key={option.value}
-            className="has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 has-[:checked]:text-brand-700 inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 text-sm font-semibold text-zinc-800 hover:border-zinc-300"
+            className="border-brand-border-strong bg-brand-50/60 text-brand-ink/90 hover:border-brand-muted has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 has-[:checked]:text-brand-700 inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border px-4 text-sm font-semibold"
           >
             <input
               type="checkbox"
@@ -183,7 +185,7 @@ export const InterestCheckboxGroup = ({
           </label>
         ))}
       </div>
-      {hint ? <p className="text-xs text-zinc-500">{hint}</p> : null}
+      {hint ? <p className="text-brand-subtle text-xs">{hint}</p> : null}
     </fieldset>
   );
 };
