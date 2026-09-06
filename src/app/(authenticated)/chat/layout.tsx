@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 
 import { chatSocket } from "@/features/chat/chat-socket";
 
@@ -15,7 +15,7 @@ const ChatLayout = ({ children }: LayoutProps<"/chat">) => {
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const visualViewport = window.visualViewport;
 
     if (!visualViewport) {

@@ -41,7 +41,7 @@ const ChatConversationPage = async ({
     result = await loadMessageHistory({ connectionId });
   } catch (error) {
     return (
-      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
+      <main className="chat-route-surface bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
         <p
           role="alert"
           className="mx-auto max-w-2xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -71,7 +71,7 @@ const ChatConversationPage = async ({
     result.outcome === ChatConstantsCollection.MessageHistoryLoadOutcome.Failure
   ) {
     return (
-      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
+      <main className="chat-route-surface bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
         <p
           role="alert"
           className="mx-auto max-w-2xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -85,7 +85,7 @@ const ChatConversationPage = async ({
   const peerName = result.peer.name ?? "Member";
 
   return (
-    <main className="chat-conversation-shell bg-brand-surface text-zinc-950">
+    <main className="chat-route-surface chat-conversation-shell bg-brand-surface text-zinc-950">
       <section className="mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
         <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-zinc-100 px-4">
           <Link

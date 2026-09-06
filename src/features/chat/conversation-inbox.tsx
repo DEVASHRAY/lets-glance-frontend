@@ -9,6 +9,7 @@ import {
   ChatSchemasCollection,
   type ConversationInboxItem,
 } from "@/features/chat/chat.schemas";
+import { InboxTimestamp } from "@/features/chat/chat-timestamp";
 import { chatSocket } from "@/features/chat/chat-socket";
 import type {
   MessageCreatedPayload,
@@ -30,12 +31,6 @@ interface UpdateDeliveryStatusInput {
 }
 
 const lastMessagePreviewMaxLength = 120;
-
-const inboxDateFormatter = new Intl.DateTimeFormat("en", {
-  day: "numeric",
-  month: "short",
-  timeZone: "UTC",
-});
 
 export const ConversationInbox = ({
   initialConversations,
@@ -399,14 +394,10 @@ export const ConversationInbox = ({
                 <span className="min-w-0 flex-1">
                   <span className="flex items-baseline justify-between gap-3">
                     <span className="truncate font-semibold">{peerName}</span>
-                    <time
+                    <InboxTimestamp
                       dateTime={conversation.lastMessage.createdAt}
                       className="shrink-0 text-xs text-zinc-400"
-                    >
-                      {inboxDateFormatter.format(
-                        new Date(conversation.lastMessage.createdAt),
-                      )}
-                    </time>
+                    />
                   </span>
 
                   <span className="mt-1 flex items-center gap-1.5 text-sm text-zinc-500">

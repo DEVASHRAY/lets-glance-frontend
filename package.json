@@ -7,7 +7,8 @@
     "build": "next build",
     "postbuild": "node scripts/prepare-standalone.mjs",
     "start": "HOSTNAME=127.0.0.1 PORT=3000 node .next/standalone/server.js",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "npm ci --include=dev && npm run build && pm2 restart lets-glance-frontend --update-env && pm2 save"
   },
   "dependencies": {
     "next": "16.3.2",

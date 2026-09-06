@@ -17,6 +17,7 @@ import {
   ChatSchemasCollection,
   type MessageHistoryItem,
 } from "@/features/chat/chat.schemas";
+import { MessageTimestamp } from "@/features/chat/chat-timestamp";
 import { MessageDeliveryIcon } from "@/features/chat/message-delivery-icon";
 import { chatSocket } from "@/features/chat/chat-socket";
 import type {
@@ -62,12 +63,6 @@ interface PendingScrollRestoration {
   scrollHeight: number;
   scrollTop: number;
 }
-
-const messageTimeFormatter = new Intl.DateTimeFormat("en", {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: "UTC",
-});
 
 const initialSendMessageActionState = {
   message: "",
@@ -866,11 +861,10 @@ export const ConversationMessages = ({
                       {message.text}
                     </p>
                     <span className="mt-1 flex items-center justify-end gap-1 text-[0.6875rem] text-zinc-400">
-                      <time dateTime={message.createdAt}>
-                        {messageTimeFormatter.format(
-                          new Date(message.createdAt),
-                        )}
-                      </time>
+                      <MessageTimestamp
+                        dateTime={message.createdAt}
+                        className="shrink-0"
+                      />
                       {isOptimistic ? (
                         <span role="status" aria-label="Sending">
                           <svg
