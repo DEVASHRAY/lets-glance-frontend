@@ -6,8 +6,8 @@ import { ConversationInbox } from "@/features/chat/conversation-inbox";
 import { loadConversationInbox } from "@/features/chat/chat.data";
 
 export const metadata: Metadata = {
-  title: "Messages | Tinder Lite",
-  description: "Continue conversations with your Tinder Lite matches.",
+  title: "Messages",
+  description: "Continue conversations with your connections.",
 };
 
 const ChatInboxPage = async () => {
@@ -17,7 +17,7 @@ const ChatInboxPage = async () => {
     result = await loadConversationInbox();
   } catch (error) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-10 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
         <p
           role="alert"
           className="mx-auto max-w-2xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -42,7 +42,7 @@ const ChatInboxPage = async () => {
     ChatConstantsCollection.ConversationInboxLoadOutcome.Failure
   ) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-10 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
         <p
           role="alert"
           className="mx-auto max-w-2xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -62,9 +62,9 @@ const ChatInboxPage = async () => {
     .join("|");
 
   return (
-    <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-10 text-zinc-950 sm:px-6">
+    <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 text-zinc-950 sm:px-6">
       <section className="mx-auto max-w-2xl">
-        <p className="text-xs font-bold tracking-[0.18em] text-[#d91d60] uppercase">
+        <p className="text-brand-700 text-xs font-bold tracking-[0.18em] uppercase">
           Your conversations
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.045em]">

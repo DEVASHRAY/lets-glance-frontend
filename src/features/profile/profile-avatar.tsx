@@ -17,7 +17,7 @@ export const ProfileAvatar = ({
 
   return (
     <span
-      className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-[#f32672] to-[#ff6840] font-bold text-white ${className}`}
+      className={`from-brand-600 to-brand-accent-600 relative flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br font-bold text-white ${className}`}
     >
       {photoUrl ? (
         <Image

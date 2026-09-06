@@ -1,22 +1,22 @@
 # Backend-for-Frontend Architecture
 
-Status: proposed architecture based on the current frontend and Express backend.
+Status: implemented frontend boundary with a same-EC2 production topology.
 
 ## Purpose
 
-The Next.js Backend for Frontend (BFF) gives the browser a same-origin, frontend-specific API while the Express application remains the source of truth for authentication and Tinder domain behavior.
+The Next.js Backend for Frontend (BFF) gives the browser a same-origin, frontend-specific API while the Express application remains the source of truth for authentication and connection-domain behavior.
 
 The BFF is not a second domain backend. It owns transport concerns: secure cookie forwarding, response shaping, cache policy, request cancellation, timeout enforcement, error normalization, and frontend observability.
 
-## Temporary development proxy
+## Implemented same-origin BFF
 
-Until Nginx is introduced, one dynamic Next.js Route Handler forwards `/api/*` to the fixed Express origin. It preserves the backend URL contract, so the browser and Express both use paths such as `/api/v1/auth/login`.
+One dynamic Next.js Route Handler forwards `/api/*` to the fixed private Express origin. It preserves the backend URL contract, so the browser and Express both use paths such as `/api/v1/auth/login`.
 
-This first implementation is intentionally transport-only: it does not shape payloads or accept a destination origin from the browser. In production, Nginx will route `/api/*` directly to Express and `/` to Next.js; the temporary catch-all Route Handler will then be removed. Route-specific BFF endpoints should be added only when Next.js provides measurable frontend-specific value.
+This implementation is intentionally transport-only: it does not accept a destination origin from the browser or duplicate domain rules. Production Nginx routes both `/` and `/api/*` to Next.js, so authentication cookies remain same-origin and the BFF boundary stays intact. Only `/socket.io/*` bypasses Next.js and reaches Express directly.
 
-## Verified current architecture
+## Historical baseline
 
-![Verified current architecture](./diagrams/current-architecture.svg)
+![Historical direct-browser architecture](./diagrams/current-architecture.svg)
 
 <details>
 <summary>Mermaid source</summary>
@@ -49,7 +49,7 @@ Current backend behavior and constraints:
 - Typed application errors return 401, 403, 404, 409, 422, or 500 as appropriate.
 - Logout uses `POST /logout`.
 
-## Proposed target architecture
+## Production architecture
 
 ![Proposed target architecture](./diagrams/target-architecture.svg)
 
@@ -61,8 +61,8 @@ flowchart LR
     subgraph client ["Client"]
         browser["Web browser"]
     end
-    subgraph gateway ["Global delivery"]
-        edgeIngress["CDN and ingress (provider TBD)"]
+    subgraph gateway ["Public ingress"]
+        nginx["Nginx on letsglance.in"]
     end
     subgraph service ["Application services"]
         nextBff["Next.js frontend and BFF"]
@@ -71,21 +71,16 @@ flowchart LR
     subgraph datastore ["Data store"]
         mongoDb["MongoDB"]
     end
-    subgraph external ["External systems"]
-        observability["Observability provider (TBD)"]
-    end
-
-    browser -->|"Same-origin HTTPS"| edgeIngress
-    edgeIngress -->|"Routes application traffic"| nextBff
-    nextBff -->|"Private upstream HTTP"| expressBackend
+    browser -->|"Same-origin HTTPS"| nginx
+    nginx -->|"/ and /api/*"| nextBff
+    nginx -->|"/socket.io/* WebSocket"| expressBackend
+    nextBff -->|"Private HTTP at 127.0.0.1:4000"| expressBackend
     expressBackend -->|"Mongoose queries"| mongoDb
-    nextBff -.->|"Observability: Web and BFF telemetry"| observability
-    expressBackend -.->|"Observability: API telemetry"| observability
 ```
 
 </details>
 
-The CDN, hosting platform, and observability provider are intentionally marked as undecided. Their behavior must not be assumed before selection.
+Nginx is the only public service. Next.js listens on `127.0.0.1:3000` and Express/Socket.IO listens on `127.0.0.1:4000`.
 
 ## Ownership boundaries
 
@@ -106,7 +101,7 @@ Express owns:
 - MongoDB access and domain transactions.
 - Rate-limit identity and domain-level abuse controls.
 
-The BFF must not decode the JWT, query MongoDB, or duplicate Tinder domain decisions.
+The BFF must not decode the JWT, query MongoDB, or duplicate connection-domain decisions.
 
 ## Login sequence
 
@@ -178,11 +173,11 @@ Before production integration:
 - Define refresh or reauthentication behavior for the one-day token expiry.
 - Add abuse protection and rate limiting at appropriate ingress and backend boundaries.
 
-## Temporary proxy surface
+## BFF proxy surface
 
 - Browser requests preserve the Express path: `/api/v1/*`.
 - The proxy supports GET, HEAD, POST, PUT, PATCH, and DELETE.
-- The destination origin always comes from server-only `TINDER_API_ORIGIN`.
-- The proxy is temporary infrastructure, not a second domain API.
+- The destination origin always comes from server-only `BACKEND_API_ORIGIN`.
+- Nginx must route `/api/*` to Next.js, not directly to Express.
 
-Future route-specific BFF endpoints must use explicit contracts and policies. A generic application proxy must not remain after Nginx takes ownership of `/api/*`.
+Future route-specific BFF endpoints must use explicit contracts and policies. The generic transport proxy can be narrowed as those explicit endpoints replace it.

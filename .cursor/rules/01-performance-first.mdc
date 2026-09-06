@@ -5,8 +5,8 @@ alwaysApply: true
 
 # Priority 1: Performance Engineering
 
-- Never treat Tinder Lite as a small or disposable app. Review every change as production-critical for a globally distributed product intended to handle up to one billion daily users, including latency, concurrency, failure modes, cost, observability, caching, and CDN behavior.
-- Treat Tinder Lite as a production performance-engineering project. Feature UI exists mainly to exercise real application flows.
+- Never treat Let's Glance as a small or disposable app. Review every change as production-critical for a globally distributed product intended to handle up to one billion daily users, including latency, concurrency, failure modes, cost, observability, caching, and CDN behavior.
+- Treat Let's Glance as a production performance-engineering project. Feature UI exists mainly to exercise real application flows.
 - Keep JSX and visual work minimal, accessible, and sufficient for measuring realistic behavior.
 - Never claim an optimization without evidence. Record a baseline, state a hypothesis, implement the change, and compare results.
 - Define performance budgets before tuning and protect them in CI when tooling exists.

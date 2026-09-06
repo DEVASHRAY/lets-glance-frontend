@@ -82,7 +82,7 @@ const LoginModeSwitch = ({
         type="button"
         disabled={disabled}
         onClick={onSwitch}
-        className="font-semibold text-zinc-700 underline-offset-4 hover:text-[#e91e63] hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fd267a]/30 disabled:cursor-wait disabled:opacity-60"
+        className="hover:text-brand-700 focus-visible:ring-brand-600/30 font-semibold text-zinc-700 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 disabled:cursor-wait disabled:opacity-60"
       >
         {label}
       </button>
@@ -112,17 +112,11 @@ const OtpLoginForm = ({
     redirect("/feed");
   }
 
-  const isCodeStep =
-    state.step === AuthConstantsCollection.OtpLoginStep.Code;
-  const visibleEmailMessage =
-    state.email === email.trim() ? state.message : "";
+  const isCodeStep = state.step === AuthConstantsCollection.OtpLoginStep.Code;
+  const visibleEmailMessage = state.email === email.trim() ? state.message : "";
 
   return (
-    <form
-      action={formAction}
-      aria-busy={pending}
-      className="mt-8 space-y-5"
-    >
+    <form action={formAction} aria-busy={pending} className="mt-8 space-y-5">
       {isCodeStep ? (
         <>
           <input name="email" type="hidden" value={state.email} />
@@ -172,7 +166,7 @@ const OtpLoginForm = ({
             type="button"
             disabled={pending}
             onClick={() => onChangeEmail({ email: state.email })}
-            className="min-h-10 w-full rounded-xl text-sm font-semibold text-zinc-600 underline-offset-4 hover:text-[#e91e63] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fd267a]/30 disabled:cursor-wait disabled:opacity-60"
+            className="hover:text-brand-700 focus-visible:ring-brand-600/30 min-h-10 w-full rounded-xl text-sm font-semibold text-zinc-600 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 disabled:cursor-wait disabled:opacity-60"
           >
             Change email
           </button>
@@ -245,11 +239,7 @@ const PasswordLoginForm = ({
   }
 
   return (
-    <form
-      action={formAction}
-      aria-busy={pending}
-      className="mt-8 space-y-5"
-    >
+    <form action={formAction} aria-busy={pending} className="mt-8 space-y-5">
       <div className="space-y-2">
         <label
           htmlFor="email"

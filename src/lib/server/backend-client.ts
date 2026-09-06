@@ -22,15 +22,15 @@ interface DescribeResponseInput extends DescribeRequestInput {
 }
 
 const getBackendOrigin = (): string => {
-  const backendOrigin = process.env["TINDER_API_ORIGIN"];
+  const backendOrigin = process.env["BACKEND_API_ORIGIN"];
 
   if (!backendOrigin) {
     logger.fail({
-      message: "TINDER_API_ORIGIN is missing",
+      message: "BACKEND_API_ORIGIN is missing",
       detail:
-        "Set TINDER_API_ORIGIN=http://127.0.0.1:4000 on the Next.js process, then restart it.",
+        "Set BACKEND_API_ORIGIN=http://127.0.0.1:4000 on the Next.js process, then restart it.",
     });
-    throw new Error("TINDER_API_ORIGIN is required");
+    throw new Error("BACKEND_API_ORIGIN is required");
   }
 
   return backendOrigin;
@@ -136,7 +136,7 @@ export const requestBackend = async ({
  * Server boundary
  * - `server-only` makes the build fail if browser code imports this file.
  * - Only environment variables prefixed with `NEXT_PUBLIC_` are included in
- *   browser JavaScript. `TINDER_API_ORIGIN` therefore stays on the server.
+ *   browser JavaScript. `BACKEND_API_ORIGIN` therefore stays on the server.
  *
  *
  * URL construction
@@ -148,9 +148,9 @@ export const requestBackend = async ({
  *   result = `http://localhost:4000/api/v1/auth/login`
  *
  *   Production:
- *   origin = `https://api.tinder-lite.com`
+ *   origin = `http://127.0.0.1:4000`
  *   path   = `/api/v1/auth/login`
- *   result = `https://api.tinder-lite.com/api/v1/auth/login`
+ *   result = `http://127.0.0.1:4000/api/v1/auth/login`
  *
  * Request content type
  * - An incoming content type is forwarded unchanged.

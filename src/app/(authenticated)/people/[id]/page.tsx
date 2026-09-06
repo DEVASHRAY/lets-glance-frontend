@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { BrandConstantsCollection } from "@/features/brand/brand.constants";
 import { ConnectionsConstantsCollection } from "@/features/connections/connections.constants";
 import { loadPeerConnection } from "@/features/connections/connections.data";
 import type { PeerConnectionLoadResult } from "@/features/connections/connections.types";
@@ -129,7 +130,7 @@ const getProfileOverlay = ({
   ) {
     return {
       kind: ConnectionsConstantsCollection.ProfileOverlayKind.Status,
-      label: "Like sent",
+      label: "Interest sent",
     };
   }
 
@@ -176,7 +177,7 @@ const getOverlayActions = ({
           href={`/chat/${overlay.connectionId}`}
           prefetch={false}
           aria-label={`Message ${personName}`}
-          className="inline-flex size-14 items-center justify-center gap-2 rounded-full bg-[#f32672] text-sm font-semibold text-white shadow-[0_16px_36px_-18px_rgba(91,16,48,0.65)] transition hover:bg-[#d91d60] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/30 sm:h-12 sm:w-auto sm:px-5"
+          className="bg-brand-600 hover:bg-brand-700 focus-visible:ring-brand-600/30 inline-flex size-14 items-center justify-center gap-2 rounded-full text-sm font-semibold text-white shadow-[0_16px_36px_-18px_rgba(49,46,129,0.55)] transition focus-visible:outline-none focus-visible:ring-4 sm:h-12 sm:w-auto sm:px-5"
         >
           <svg
             aria-hidden="true"
@@ -232,7 +233,7 @@ export const generateMetadata = async ({
 
   if (!id) {
     return {
-      title: "Profile | Tinder Lite",
+      title: "Profile",
     };
   }
 
@@ -242,13 +243,13 @@ export const generateMetadata = async ({
     result.outcome !== ProfileConstantsCollection.ProfileLoadOutcome.Success
   ) {
     return {
-      title: "Profile | Tinder Lite",
+      title: "Profile",
     };
   }
 
   return {
-    title: `${result.profile.name} | Tinder Lite`,
-    description: `View ${result.profile.name}'s profile on Tinder Lite.`,
+    title: result.profile.name,
+    description: `View ${result.profile.name}'s profile on ${BrandConstantsCollection.DisplayName}.`,
   };
 };
 
@@ -286,7 +287,7 @@ const PersonPage = async ({ params }: PageProps<"/people/[id]">) => {
     result.outcome === ProfileConstantsCollection.ProfileLoadOutcome.Failure
   ) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -318,13 +319,13 @@ const PersonPage = async ({ params }: PageProps<"/people/[id]">) => {
     "connectionId" in overlay;
 
   return (
-    <main className="bg-[#fff8f6] text-zinc-950">
+    <main className="bg-brand-surface text-zinc-950">
       <PersonProfileDetails
         actions={messageActionIsFloating ? undefined : overlayActions}
         eyebrow={
           overlay.kind ===
           ConnectionsConstantsCollection.ProfileOverlayKind.Review
-            ? "Liked you"
+            ? "Interested in you"
             : "Profile"
         }
         floatingActions={messageActionIsFloating ? overlayActions : undefined}

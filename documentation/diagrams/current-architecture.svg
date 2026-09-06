@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330" role="img" aria-labelledby="title description">
-  <title id="title">Verified current Tinder Lite architecture</title>
-  <desc id="description">The web browser calls the Express API directly, and Express queries MongoDB through Mongoose.</desc>
+  <title id="title">Historical direct-browser architecture before the Let's Glance BFF</title>
+  <desc id="description">The historical web browser called the Express API directly, and Express queried MongoDB through Mongoose.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#344054"/>
     </marker>
   </defs>
   <rect width="1200" height="330" fill="#ffffff"/>
-  <text x="40" y="36" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#101828">Verified current architecture</text>
+  <text x="40" y="36" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#101828">Historical direct-browser architecture</text>
 
   <rect x="40" y="70" width="280" height="210" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
   <text x="60" y="102" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#475467">CLIENT</text>

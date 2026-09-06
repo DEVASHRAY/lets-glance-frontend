@@ -7,8 +7,8 @@ import { loadViewerProfile } from "@/features/profile/profile.data";
 import type { ProfileLoadResult } from "@/features/profile/profile.types";
 
 export const metadata: Metadata = {
-  title: "Your profile | Tinder Lite",
-  description: "Update your Tinder Lite profile details.",
+  title: "Your profile",
+  description: "Update your profile details.",
 };
 
 const ProfilePage = async () => {
@@ -18,7 +18,7 @@ const ProfilePage = async () => {
     result = await loadViewerProfile();
   } catch (error) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -32,14 +32,17 @@ const ProfilePage = async () => {
   }
 
   if (
-    result.outcome === ProfileConstantsCollection.ProfileLoadOutcome.Unauthorized
+    result.outcome ===
+    ProfileConstantsCollection.ProfileLoadOutcome.Unauthorized
   ) {
     redirect("/login");
   }
 
-  if (result.outcome === ProfileConstantsCollection.ProfileLoadOutcome.Failure) {
+  if (
+    result.outcome === ProfileConstantsCollection.ProfileLoadOutcome.Failure
+  ) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -53,13 +56,13 @@ const ProfilePage = async () => {
   const { profile } = result;
 
   return (
-    <main className="relative isolate min-h-[calc(100svh-4rem)] bg-[#fff8f6] text-zinc-950">
+    <main className="bg-brand-surface relative isolate min-h-[calc(100svh-4rem)] text-zinc-950">
       <div
         aria-hidden="true"
-        className="absolute top-0 left-1/2 -z-10 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-[#ff9abb]/20 blur-3xl"
+        className="bg-brand-200/40 absolute top-0 left-1/2 -z-10 h-96 w-[48rem] -translate-x-1/2 rounded-full blur-3xl"
       />
       <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-10">
-        <p className="text-xs font-bold tracking-[0.18em] text-[#d91d60] uppercase">
+        <p className="text-brand-700 text-xs font-bold tracking-[0.18em] uppercase">
           Your profile
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">

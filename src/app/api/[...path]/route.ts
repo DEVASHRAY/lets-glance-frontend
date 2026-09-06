@@ -71,8 +71,8 @@ export const PUT = proxyRequest;
  * - Transport error details are visible only during local development.
  *   Production returns a generic message to avoid leaking internal details.
  *
- * Temporary architecture
+ * Production architecture
  * - Next.js 14.1 and 16.3 both support App Router Route Handlers.
- * - Production Nginx will eventually route `/api/*` directly to Express, so
- *   this temporary application-level proxy can then be removed.
+ * - Nginx routes `/api/*` to Next.js so this BFF keeps browser API traffic
+ *   same-origin and forwards it to the private Express listener.
  */

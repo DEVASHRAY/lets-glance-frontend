@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 
 import { SignupFlow } from "@/features/auth/signup-flow";
+import { BrandConstantsCollection } from "@/features/brand/brand.constants";
 
 export const metadata: Metadata = {
-  title: "Join | Tinder Lite",
-  description: "Create a Tinder Lite profile and start meeting new people.",
+  title: "Join",
+  description: `Create a ${BrandConstantsCollection.DisplayName} profile and start meeting new people.`,
 };
 
 const SignupPage = () => {

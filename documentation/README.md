@@ -1,4 +1,4 @@
-# Tinder Lite Documentation
+# Let's Glance Documentation
 
 This directory is the source of truth for architecture, request flows, performance decisions, and operational behavior.
 
@@ -25,6 +25,7 @@ Every diagram must:
 ## Current documents
 
 - [BFF architecture and ownership](./bff-architecture.md)
+- [Same-EC2 production deployment](./ec2-deployment.md)
 
 ## Planned documents
 

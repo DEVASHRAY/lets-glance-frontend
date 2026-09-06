@@ -32,7 +32,7 @@ const PILL_CLASS_NAME =
   "rounded-full border border-white/20 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md";
 
 const TILE_CLASS_NAME =
-  "rounded-[1.4rem] border border-white/80 bg-white/90 p-4 shadow-[0_18px_40px_-28px_rgba(72,24,49,0.45)]";
+  "rounded-[1.4rem] border border-white/80 bg-white/90 p-4 shadow-[0_18px_40px_-28px_rgba(30,41,59,0.32)]";
 
 const getOrderedPhotos = ({
   photoUrl,
@@ -71,7 +71,7 @@ const getFactsWithValues = ({
 const SpotlightCard = ({ body, kicker, label }: SpotlightCardProps) => {
   return (
     <section className={TILE_CLASS_NAME}>
-      <p className="text-[0.65rem] font-bold tracking-[0.18em] text-[#d91d60] uppercase">
+      <p className="text-brand-700/70 text-[0.65rem] font-bold tracking-[0.18em] uppercase">
         {label}
       </p>
       <p className="mt-2 text-xl leading-snug font-semibold tracking-[-0.03em] text-zinc-950">
@@ -87,7 +87,7 @@ const SpotlightCard = ({ body, kicker, label }: SpotlightCardProps) => {
 const FactTile = ({ label, value }: DetailFact) => {
   return (
     <div className={TILE_CLASS_NAME}>
-      <p className="text-[0.65rem] font-bold tracking-[0.16em] text-zinc-400 uppercase">
+      <p className="text-brand-700/70 text-[0.65rem] font-bold tracking-[0.16em] uppercase">
         {label}
       </p>
       <p className="mt-1.5 text-sm leading-6 font-medium text-zinc-800">
@@ -265,7 +265,7 @@ export const PersonProfileDetails = ({
 
           {lifestyle?.sundayRitual ? (
             <section className={`${TILE_CLASS_NAME} sm:col-span-2`}>
-              <p className="text-[0.65rem] font-bold tracking-[0.18em] text-[#d91d60] uppercase">
+              <p className="text-brand-700/70 text-[0.65rem] font-bold tracking-[0.18em] uppercase">
                 Sunday
               </p>
               <p className="mt-2 text-sm leading-6 text-zinc-800">

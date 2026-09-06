@@ -47,7 +47,7 @@ export const ProfilePortrait = ({
       ) : (
         <span
           aria-hidden="true"
-          className="flex size-full items-center justify-center bg-gradient-to-br from-[#f32672] to-[#ff6840] text-8xl font-bold text-white"
+          className="from-brand-600 to-brand-accent-600 flex size-full items-center justify-center bg-gradient-to-br text-8xl font-bold text-white"
         >
           {initial}
         </span>
@@ -66,4 +66,3 @@ export const ProfilePortrait = ({
  *   deprecated `priority` in favor of clearer preload / fetch-priority props.
  *   Next.js 14.1 used `priority` for the same behavior.
  */
-

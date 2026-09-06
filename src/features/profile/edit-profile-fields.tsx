@@ -57,7 +57,7 @@ interface InterestCheckboxGroupProps {
 }
 
 const CONTROL_CLASS_NAME =
-  "min-h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-base text-zinc-950 outline-none transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-[#fd267a] focus:bg-white focus:ring-4 focus:ring-[#fd267a]/10";
+  "focus:border-brand-600 focus:ring-brand-600/10 min-h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-base text-zinc-950 outline-none transition placeholder:text-zinc-400 hover:border-zinc-300 focus:bg-white focus:ring-4";
 
 export const FieldShell = ({
   children,
@@ -67,7 +67,10 @@ export const FieldShell = ({
 }: FieldShellProps) => {
   return (
     <div className="space-y-2">
-      <label htmlFor={htmlFor} className="block text-sm font-semibold text-zinc-800">
+      <label
+        htmlFor={htmlFor}
+        className="block text-sm font-semibold text-zinc-800"
+      >
         {label}
       </label>
       {children}
@@ -167,14 +170,14 @@ export const InterestCheckboxGroup = ({
         {options.map((option) => (
           <label
             key={option.value}
-            className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 text-sm font-semibold text-zinc-800 hover:border-zinc-300 has-[:checked]:border-[#fd267a] has-[:checked]:bg-[#fff0f5] has-[:checked]:text-[#d91d60]"
+            className="has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 has-[:checked]:text-brand-700 inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 text-sm font-semibold text-zinc-800 hover:border-zinc-300"
           >
             <input
               type="checkbox"
               name={name}
               value={option.value}
               defaultChecked={option.checked}
-              className="size-4 accent-[#fd267a]"
+              className="accent-brand-600 size-4"
             />
             {option.label}
           </label>

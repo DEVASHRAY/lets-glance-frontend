@@ -1,13 +1,13 @@
 {
-  "name": "tinder-lite-frontend",
+  "name": "lets-glance-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "deploy": "npm ci && npm run build && pm2 restart tinder-lite-frontend"
+    "postbuild": "node scripts/prepare-standalone.mjs",
+    "start": "HOSTNAME=127.0.0.1 PORT=3000 node .next/standalone/server.js",
+    "lint": "eslint"
   },
   "dependencies": {
     "next": "16.3.2",

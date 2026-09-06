@@ -1,6 +1,6 @@
 # Performance Baseline
 
-This document records reproducible performance evidence for Tinder Lite. The first entry measures the empty Next.js application so later measurements can separate framework cost from application cost.
+This document records reproducible performance evidence for Let's Glance. The first entry measures the empty Next.js application so later measurements can separate framework cost from application cost.
 
 ## Baseline 001: Framework Floor
 

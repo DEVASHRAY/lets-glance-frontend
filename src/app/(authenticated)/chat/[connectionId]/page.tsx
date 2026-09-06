@@ -10,8 +10,8 @@ import { loadMessageHistory } from "@/features/chat/chat.data";
 import { ProfileAvatar } from "@/features/profile/profile-avatar";
 
 export const metadata: Metadata = {
-  title: "Conversation | Tinder Lite",
-  description: "Read your Tinder Lite conversation.",
+  title: "Conversation",
+  description: "Read your conversation.",
 };
 
 const ChatConversationPage = async ({
@@ -35,7 +35,7 @@ const ChatConversationPage = async ({
     result = await loadMessageHistory({ connectionId });
   } catch (error) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-10 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
         <p
           role="alert"
           className="mx-auto max-w-2xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -65,7 +65,7 @@ const ChatConversationPage = async ({
     result.outcome === ChatConstantsCollection.MessageHistoryLoadOutcome.Failure
   ) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-10 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-10 sm:px-6">
         <p
           role="alert"
           className="mx-auto max-w-2xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -76,16 +76,16 @@ const ChatConversationPage = async ({
     );
   }
 
-  const peerName = result.peer.name ?? "Tinder Lite member";
+  const peerName = result.peer.name ?? "Member";
 
   return (
-    <main className="fixed inset-x-0 top-16 bottom-0 overflow-hidden bg-[#fff8f6] px-4 py-4 text-zinc-950 sm:px-6 sm:py-6">
+    <main className="bg-brand-surface fixed inset-x-0 top-16 bottom-0 overflow-hidden px-4 py-4 text-zinc-950 sm:px-6 sm:py-6">
       <section className="mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
         <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-zinc-100 px-4">
           <Link
             href="/chat"
             aria-label="Back to inbox"
-            className="flex size-10 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/20"
+            className="focus-visible:ring-brand-600/20 flex size-10 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4"
           >
             <svg
               aria-hidden="true"
@@ -104,7 +104,7 @@ const ChatConversationPage = async ({
           <Link
             href={`/people/${result.peer.id}`}
             prefetch={false}
-            className="flex min-w-0 items-center gap-3 rounded-xl py-1 pr-3 transition hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/20"
+            className="focus-visible:ring-brand-600/20 flex min-w-0 items-center gap-3 rounded-xl py-1 pr-3 transition hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-4"
           >
             <ProfileAvatar
               className="size-10 rounded-full text-sm"

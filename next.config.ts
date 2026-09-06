@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     qualities: [75, 90],
     remotePatterns: [
@@ -72,4 +73,10 @@ export default nextConfig;
  * Image qualities
  * - Next.js 16 only allows quality `75` unless `images.qualities` lists more
  *   values. Next.js 14.1 accepted any quality from 1 to 100.
+ *
+ * Standalone output
+ * - Next.js 16 traces the production server and emits only its runtime files
+ *   under `.next/standalone`; the deployment copies browser assets beside it.
+ * - Next.js 14.1 supported the same output mode, but the default build still
+ *   required the full installation when started with `next start`.
  */

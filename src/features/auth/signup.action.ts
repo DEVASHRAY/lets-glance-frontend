@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { AuthConstantsCollection } from "@/features/auth/auth.constants";
 import { SignupConstantsCollection } from "@/features/auth/signup.constants";
+import { BrandConstantsCollection } from "@/features/brand/brand.constants";
 import { ProfileConstantsCollection } from "@/features/profile/profile.constants";
 
 type UserGender =
@@ -486,7 +487,7 @@ export const signupAction = async (
       return {
         ...currentState,
         field: SignupConstantsCollection.SignupActionField.Email,
-        message: "That email is already on Tinder Lite",
+        message: `That email is already on ${BrandConstantsCollection.DisplayName}`,
       };
     }
 

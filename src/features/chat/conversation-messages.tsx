@@ -111,7 +111,7 @@ const MessageSubmitButton = ({
     <button
       type="submit"
       disabled={pending || messageIsEmpty}
-      className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#f32672] text-white shadow-sm transition hover:bg-[#d91d60] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/25 disabled:cursor-not-allowed disabled:opacity-50"
+      className="bg-brand-600 hover:bg-brand-700 focus-visible:ring-brand-600/25 flex size-11 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50"
       aria-label={pending ? "Sending message" : "Send message"}
     >
       <svg
@@ -808,7 +808,7 @@ export const ConversationMessages = ({
             requestOlderMessages();
           }
         }}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#fff8f6]/70 [scrollbar-width:none] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#f32672]/25 [&::-webkit-scrollbar]:hidden"
+        className="bg-brand-surface/70 focus-visible:ring-brand-600/25 min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none [&::-webkit-scrollbar]:hidden"
       >
         {optimisticMessages.length ? (
           <ol
@@ -825,7 +825,7 @@ export const ConversationMessages = ({
                   >
                     <span
                       aria-hidden="true"
-                      className="size-3.5 animate-spin rounded-full border-2 border-zinc-300 border-t-[#f32672]"
+                      className="border-t-brand-600 size-3.5 animate-spin rounded-full border-2 border-zinc-300"
                     />
                     Loading older messages
                   </span>
@@ -858,7 +858,7 @@ export const ConversationMessages = ({
                   <article
                     className={
                       sentByAuthenticatedUser
-                        ? "max-w-[82%] rounded-2xl rounded-br-md border border-[#f32672]/15 bg-[#fff0f5] px-3.5 py-2 text-zinc-950 shadow-sm"
+                        ? "border-brand-600/15 bg-brand-50 max-w-[82%] rounded-2xl rounded-br-md border px-3.5 py-2 text-zinc-950 shadow-sm"
                         : "max-w-[82%] rounded-2xl rounded-bl-md border border-zinc-200 bg-white px-3.5 py-2 text-zinc-950 shadow-sm"
                     }
                   >
@@ -961,7 +961,7 @@ export const ConversationMessages = ({
             rows={1}
             enterKeyHint="send"
             placeholder="Write a message"
-            className="max-h-32 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm leading-5 outline-none transition placeholder:text-zinc-400 focus:border-[#f32672]/50 focus:bg-white focus:ring-4 focus:ring-[#f32672]/10"
+            className="focus:border-brand-600/50 focus:ring-brand-600/10 max-h-32 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm leading-5 outline-none transition placeholder:text-zinc-400 focus:bg-white focus:ring-4"
           />
           <MessageSubmitButton
             messageIsEmpty={!messageText.trim()}

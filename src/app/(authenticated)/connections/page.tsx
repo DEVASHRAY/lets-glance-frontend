@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { BrandMark } from "@/features/brand/brand-mark";
 import { ConnectionsConstantsCollection } from "@/features/connections/connections.constants";
 import { loadConnections } from "@/features/connections/connections.data";
 import { ConnectionPortraitCard } from "@/features/connections/connection-portrait-card";
@@ -13,8 +14,8 @@ import type {
 } from "@/features/connections/connections.types";
 
 export const metadata: Metadata = {
-  title: "Connections | Tinder Lite",
-  description: "View your Tinder Lite matches and connections.",
+  title: "Connections",
+  description: "View your connections and recent interest.",
 };
 
 interface ResolveConnectionListInput {
@@ -77,19 +78,19 @@ const getEmptyState = ({
   switch (connectionType) {
     case ConnectionsConstantsCollection.ConnectionList.Received:
       return {
-        message: "When someone likes you, they’ll appear here.",
-        title: "No new likes yet",
+        message: "When someone is interested in you, they’ll appear here.",
+        title: "No new interest yet",
       };
     case ConnectionsConstantsCollection.ConnectionList.Sent:
       return {
-        message: "Profiles you choose with the heart will appear here.",
-        title: "You haven't sent any likes",
+        message: "Profiles you choose to connect with will appear here.",
+        title: "You haven't chosen anyone yet",
       };
     default:
       return {
         message:
-          "When you both choose each other, your matches will appear here.",
-        title: "No matches yet",
+          "When you both choose each other, your connections will appear here.",
+        title: "No connections yet",
       };
   }
 };
@@ -122,7 +123,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
     });
   } catch (error) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -147,7 +148,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
     ConnectionsConstantsCollection.ConnectionsLoadOutcome.Failure
   ) {
     return (
-      <main className="min-h-[calc(100svh-4rem)] bg-[#fff8f6] px-4 py-12 text-zinc-950 sm:px-6">
+      <main className="bg-brand-surface min-h-[calc(100svh-4rem)] px-4 py-12 text-zinc-950 sm:px-6">
         <div
           role="alert"
           className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800"
@@ -163,14 +164,14 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
   });
 
   return (
-    <main className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden bg-[#fff8f6] px-4 py-10 text-zinc-950 sm:px-6 sm:py-14">
+    <main className="bg-brand-surface relative isolate min-h-[calc(100svh-4rem)] overflow-hidden px-4 py-10 text-zinc-950 sm:px-6 sm:py-14">
       <div
         aria-hidden="true"
-        className="absolute top-0 left-1/2 -z-10 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-[#ff9abb]/20 blur-3xl"
+        className="bg-brand-200/40 absolute top-0 left-1/2 -z-10 h-96 w-[48rem] -translate-x-1/2 rounded-full blur-3xl"
       />
 
       <section className="mx-auto max-w-6xl">
-        <p className="text-xs font-bold tracking-[0.18em] text-[#d91d60] uppercase">
+        <p className="text-brand-700 text-xs font-bold tracking-[0.18em] uppercase">
           Your people
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
@@ -192,7 +193,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
             }
             href="/connections?type=matches"
           >
-            Matches
+            Connected
           </ConnectionTab>
           <ConnectionTab
             active={
@@ -201,7 +202,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
             }
             href="/connections?type=received"
           >
-            Likes you
+            Interested in you
           </ConnectionTab>
           <ConnectionTab
             active={
@@ -242,7 +243,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
                         href={`/chat/${connection.connectionId}`}
                         prefetch={false}
                         aria-label={`Message ${connection.profile.name}`}
-                        className="inline-flex size-10 items-center justify-center gap-1.5 rounded-full bg-[#f32672] text-xs font-semibold text-white shadow-sm transition hover:bg-[#d91d60] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/30 sm:h-9 sm:w-auto sm:px-3"
+                        className="bg-brand-600 hover:bg-brand-700 focus-visible:ring-brand-600/30 inline-flex size-10 items-center justify-center gap-1.5 rounded-full text-xs font-semibold text-white shadow-sm transition focus-visible:outline-none focus-visible:ring-4 sm:h-9 sm:w-auto sm:px-3"
                       >
                         <svg
                           aria-hidden="true"
@@ -267,12 +268,7 @@ const ConnectionsPage = async ({ searchParams }: PageProps<"/connections">) => {
           </ul>
         ) : (
           <div className="mt-10 rounded-[2rem] border border-dashed border-zinc-300 bg-white/65 px-6 py-16 text-center backdrop-blur">
-            <span
-              aria-hidden="true"
-              className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[#fff0f5] text-2xl text-[#f32672]"
-            >
-              ♥
-            </span>
+            <BrandMark className="mx-auto size-14 shadow-lg shadow-indigo-500/15" />
             <h2 className="mt-5 text-xl font-semibold">{emptyState.title}</h2>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-zinc-500">
               {emptyState.message}

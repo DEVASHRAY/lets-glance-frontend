@@ -14,12 +14,10 @@ import {
   type TransitionEvent,
 } from "react";
 
+import { BrandMark } from "@/features/brand/brand-mark";
 import { FeedConstantsCollection } from "@/features/feed/feed.constants";
 import { persistSwipeAction } from "@/features/feed/feed-swipe.action";
-import type {
-  FeedProfile,
-  SwipeDirection,
-} from "@/features/feed/feed.types";
+import type { FeedProfile, SwipeDirection } from "@/features/feed/feed.types";
 
 interface FeedProfileDeckProps {
   profiles: FeedProfile[];
@@ -89,8 +87,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
   >();
   const [optimisticProfileIndex, setOptimisticProfileIndex] = useOptimistic(
     currentProfileIndex,
-    (confirmedIndex, nextIndex: number) =>
-      Math.max(confirmedIndex, nextIndex),
+    (confirmedIndex, nextIndex: number) => Math.max(confirmedIndex, nextIndex),
   );
   const dragSessionRef = useRef<DragSession | null>(null);
   const frameRequestRef = useRef(0);
@@ -312,9 +309,7 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
     openCurrentProfile();
   };
 
-  const handleCardTransitionEnd = (
-    event: TransitionEvent<HTMLElement>,
-  ) => {
+  const handleCardTransitionEnd = (event: TransitionEvent<HTMLElement>) => {
     if (event.target !== event.currentTarget || !exitDirection) {
       return;
     }
@@ -351,7 +346,8 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
         }
 
         if (
-          result.outcome === FeedConstantsCollection.SwipeMutationOutcome.Failure
+          result.outcome ===
+          FeedConstantsCollection.SwipeMutationOutcome.Failure
         ) {
           setSwipeError(result.message);
           return;
@@ -375,13 +371,8 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
   if (!profiles.length) {
     return (
       <div className="flex min-h-[34rem] items-center justify-center px-4">
-        <div className="max-w-md rounded-[2rem] border border-white/70 bg-white/75 p-10 text-center shadow-[0_30px_90px_-45px_rgba(76,29,58,0.45)] backdrop-blur-xl">
-          <span
-            aria-hidden="true"
-            className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff2d79] to-[#ff6a3d] text-2xl text-white shadow-lg"
-          >
-            ♥
-          </span>
+        <div className="max-w-md rounded-[2rem] border border-white/70 bg-white/75 p-10 text-center shadow-[0_30px_90px_-45px_rgba(30,41,59,0.35)] backdrop-blur-xl">
+          <BrandMark className="mx-auto size-16 shadow-lg shadow-indigo-500/20" />
           <h2 className="mt-6 text-2xl font-semibold tracking-tight">
             You&apos;ve explored enough for today
           </h2>
@@ -396,10 +387,10 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
   if (!currentProfile) {
     return (
       <div className="flex min-h-[34rem] items-center justify-center px-4">
-        <div className="max-w-md rounded-[2rem] border border-white/70 bg-white/80 p-10 text-center shadow-[0_30px_90px_-45px_rgba(76,29,58,0.45)] backdrop-blur-xl">
+        <div className="max-w-md rounded-[2rem] border border-white/70 bg-white/80 p-10 text-center shadow-[0_30px_90px_-45px_rgba(30,41,59,0.35)] backdrop-blur-xl">
           <span
             aria-hidden="true"
-            className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#fff0f5] text-3xl text-[#f32672]"
+            className="bg-brand-50 text-brand-600 mx-auto flex size-16 items-center justify-center rounded-full text-3xl"
           >
             ✦
           </span>
@@ -421,185 +412,178 @@ export const FeedProfileDeck = ({ profiles }: FeedProfileDeckProps) => {
 
   return (
     <div className="mx-auto flex w-full max-w-[29rem] flex-col items-center">
-          <p className="sr-only" aria-live="polite">
-            Viewing {currentProfile.name}, profile {optimisticProfileIndex + 1}{" "}
-            of {profiles.length}
-          </p>
+      <p className="sr-only" aria-live="polite">
+        Viewing {currentProfile.name}, profile {optimisticProfileIndex + 1} of{" "}
+        {profiles.length}
+      </p>
 
-          <div className="relative h-[min(62svh,38rem)] min-h-[31rem] w-full">
-            {visibleProfiles.map((profile, position) => {
-              const isTopCard = position === 0;
-              const transform = getCardTransform({
-                dragOffset,
-                isTopCard,
-                position,
-              });
+      <div className="relative h-[min(62svh,38rem)] min-h-[31rem] w-full">
+        {visibleProfiles.map((profile, position) => {
+          const isTopCard = position === 0;
+          const transform = getCardTransform({
+            dragOffset,
+            isTopCard,
+            position,
+          });
 
-              return (
-                <article
-                  key={profile.id}
-                  aria-hidden={!isTopCard}
-                  aria-label={`${profile.name}, ${profile.age}. Open profile`}
-                  tabIndex={isTopCard ? 0 : -1}
-                  onClick={isTopCard ? handleCardClick : undefined}
-                  onKeyDown={isTopCard ? handleKeyDown : undefined}
-                  onPointerCancel={
-                    isTopCard ? handlePointerCancel : undefined
-                  }
-                  onPointerDown={isTopCard ? handlePointerDown : undefined}
-                  onPointerMove={isTopCard ? handlePointerMove : undefined}
-                  onPointerUp={isTopCard ? handlePointerUp : undefined}
-                  onTransitionEnd={
-                    isTopCard ? handleCardTransitionEnd : undefined
-                  }
-                  className={`absolute inset-0 overflow-hidden rounded-[2.25rem] border border-white/80 bg-zinc-900 shadow-[0_38px_100px_-36px_rgba(58,20,41,0.7)] select-none ${
-                    isTopCard ? "touch-pan-y" : ""
-                  } ${
-                    isDragging && isTopCard
-                      ? "cursor-grabbing"
-                      : "cursor-pointer transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                  } focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/35`}
-                  style={{
-                    opacity: 1 - position * 0.16,
-                    pointerEvents: isTopCard ? "auto" : "none",
-                    transform,
-                    zIndex: VISIBLE_CARD_COUNT - position,
-                  }}
-                >
-                  {profile.photoUrl ? (
-                    <Image
-                      fill
-                      alt={`Portrait of ${profile.name}`}
-                      draggable={false}
-                      priority={isTopCard}
-                      sizes="(max-width: 640px) calc(100vw - 32px), 464px"
-                      src={profile.photoUrl}
-                      className="pointer-events-none object-cover"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#3b1630] via-[#b31e59] to-[#ff7148] text-8xl font-semibold text-white">
-                      {profile.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90" />
-                  <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/25 to-transparent" />
+          return (
+            <article
+              key={profile.id}
+              aria-hidden={!isTopCard}
+              aria-label={`${profile.name}, ${profile.age}. Open profile`}
+              tabIndex={isTopCard ? 0 : -1}
+              onClick={isTopCard ? handleCardClick : undefined}
+              onKeyDown={isTopCard ? handleKeyDown : undefined}
+              onPointerCancel={isTopCard ? handlePointerCancel : undefined}
+              onPointerDown={isTopCard ? handlePointerDown : undefined}
+              onPointerMove={isTopCard ? handlePointerMove : undefined}
+              onPointerUp={isTopCard ? handlePointerUp : undefined}
+              onTransitionEnd={isTopCard ? handleCardTransitionEnd : undefined}
+              className={`absolute inset-0 overflow-hidden rounded-[2.25rem] border border-white/80 bg-zinc-900 shadow-[0_38px_100px_-36px_rgba(30,41,59,0.62)] select-none ${
+                isTopCard ? "touch-pan-y" : ""
+              } ${
+                isDragging && isTopCard
+                  ? "cursor-grabbing"
+                  : "cursor-pointer transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              } focus-visible:ring-brand-600/35 focus-visible:outline-none focus-visible:ring-4`}
+              style={{
+                opacity: 1 - position * 0.16,
+                pointerEvents: isTopCard ? "auto" : "none",
+                transform,
+                zIndex: VISIBLE_CARD_COUNT - position,
+              }}
+            >
+              {profile.photoUrl ? (
+                <Image
+                  fill
+                  alt={`Portrait of ${profile.name}`}
+                  draggable={false}
+                  priority={isTopCard}
+                  sizes="(max-width: 640px) calc(100vw - 32px), 464px"
+                  src={profile.photoUrl}
+                  className="pointer-events-none object-cover"
+                />
+              ) : (
+                <div className="from-brand-700 via-brand-600 to-brand-accent-600 absolute inset-0 flex items-center justify-center bg-gradient-to-br text-8xl font-semibold text-white">
+                  {profile.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90" />
+              <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/25 to-transparent" />
 
-                  {isTopCard ? (
-                    <>
-                      <div
-                        aria-hidden="true"
-                        className="absolute top-24 left-6 -rotate-12 rounded-xl border-4 border-white px-4 py-2 text-2xl font-black tracking-[0.12em] text-white shadow-lg"
-                        style={{ opacity: rightIntent }}
-                      >
-                        HELLO
-                      </div>
-                      <div
-                        aria-hidden="true"
-                        className="absolute top-24 right-6 rotate-12 rounded-xl border-4 border-white px-4 py-2 text-2xl font-black tracking-[0.12em] text-white shadow-lg"
-                        style={{ opacity: leftIntent }}
-                      >
-                        NEXT
-                      </div>
-                    </>
-                  ) : null}
-
-                  <div className="absolute right-0 bottom-0 left-0 p-7 text-center text-white sm:p-9">
-                    <h2 className="text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
-                      {profile.name}
-                    </h2>
-                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                      <span className={`${FEED_PILL_CLASS_NAME} tabular-nums`}>
-                        {profile.age}
-                      </span>
-                      {profile.jobTitle ? (
-                        <span className={FEED_PILL_CLASS_NAME}>
-                          {profile.jobTitle}
-                        </span>
-                      ) : null}
-                      {profile.location?.city ? (
-                        <span className={FEED_PILL_CLASS_NAME}>
-                          {profile.location.city}
-                        </span>
-                      ) : null}
-                      <span className={`${FEED_PILL_CLASS_NAME} capitalize`}>
-                        {profile.gender}
-                      </span>
-                    </div>
-                    {profile.bio ? (
-                      <p className="mt-4 line-clamp-3 text-sm leading-6 text-white/85">
-                        {profile.bio}
-                      </p>
-                    ) : null}
+              {isTopCard ? (
+                <>
+                  <div
+                    aria-hidden="true"
+                    className="absolute top-24 left-6 -rotate-12 rounded-xl border-4 border-white px-4 py-2 text-2xl font-black tracking-[0.12em] text-white shadow-lg"
+                    style={{ opacity: rightIntent }}
+                  >
+                    HELLO
                   </div>
-                </article>
-              );
-            })}
-          </div>
+                  <div
+                    aria-hidden="true"
+                    className="absolute top-24 right-6 rotate-12 rounded-xl border-4 border-white px-4 py-2 text-2xl font-black tracking-[0.12em] text-white shadow-lg"
+                    style={{ opacity: leftIntent }}
+                  >
+                    NEXT
+                  </div>
+                </>
+              ) : null}
 
-          <div className="relative z-40 -mt-6 flex items-center rounded-[1.6rem] border border-white/80 bg-white/85 p-2 shadow-[0_22px_55px_-24px_rgba(45,20,34,0.75)] backdrop-blur-xl">
-            <button
-              type="button"
-              aria-label={`Move past ${currentProfile.name}`}
-              disabled={Boolean(exitDirection) || isSwipePending}
-              onClick={() =>
-                completeSwipe({
-                  direction: FeedConstantsCollection.SwipeDirection.Left,
-                })
-              }
-              className="group flex size-12 items-center justify-center rounded-[1.1rem] bg-zinc-100 text-zinc-500 transition duration-200 hover:bg-zinc-950 hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-400/25 disabled:cursor-wait disabled:opacity-50 sm:size-14"
-            >
-              <span
-                aria-hidden="true"
-                className="transition-transform group-hover:-rotate-12"
-              >
-                ✕
-              </span>
-            </button>
-            <span aria-hidden="true" className="mx-2 h-7 w-px bg-zinc-200" />
-            <button
-              type="button"
-              aria-label={`Continue with ${currentProfile.name}`}
-              disabled={Boolean(exitDirection) || isSwipePending}
-              onClick={() =>
-                completeSwipe({
-                  direction: FeedConstantsCollection.SwipeDirection.Right,
-                })
-              }
-              className="group flex size-12 items-center justify-center rounded-[1.1rem] bg-gradient-to-br from-[#f32672] to-[#ff6840] text-xl text-white shadow-[0_12px_26px_-12px_rgba(243,38,114,0.85)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-12px_rgba(243,38,114,0.95)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/30 disabled:cursor-wait disabled:opacity-50 sm:size-14"
-            >
-              <span
-                aria-hidden="true"
-                className="transition-transform group-hover:scale-110"
-              >
-                ♥
-              </span>
-            </button>
-          </div>
+              <div className="absolute right-0 bottom-0 left-0 p-7 text-center text-white sm:p-9">
+                <h2 className="text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
+                  {profile.name}
+                </h2>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  <span className={`${FEED_PILL_CLASS_NAME} tabular-nums`}>
+                    {profile.age}
+                  </span>
+                  {profile.jobTitle ? (
+                    <span className={FEED_PILL_CLASS_NAME}>
+                      {profile.jobTitle}
+                    </span>
+                  ) : null}
+                  {profile.location?.city ? (
+                    <span className={FEED_PILL_CLASS_NAME}>
+                      {profile.location.city}
+                    </span>
+                  ) : null}
+                  <span className={`${FEED_PILL_CLASS_NAME} capitalize`}>
+                    {profile.gender}
+                  </span>
+                </div>
+                {profile.bio ? (
+                  <p className="mt-4 line-clamp-3 text-sm leading-6 text-white/85">
+                    {profile.bio}
+                  </p>
+                ) : null}
+              </div>
+            </article>
+          );
+        })}
+      </div>
 
-          <Link
-            href={`/people/${currentProfile.id}`}
-            className="relative z-40 mt-5 rounded-lg px-3 py-2 text-sm font-semibold text-[#d91d60] transition hover:text-[#b21850] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/20"
+      <div className="relative z-40 -mt-6 flex items-center rounded-[1.6rem] border border-white/80 bg-white/85 p-2 shadow-[0_22px_55px_-24px_rgba(30,41,59,0.58)] backdrop-blur-xl">
+        <button
+          type="button"
+          aria-label={`Move past ${currentProfile.name}`}
+          disabled={Boolean(exitDirection) || isSwipePending}
+          onClick={() =>
+            completeSwipe({
+              direction: FeedConstantsCollection.SwipeDirection.Left,
+            })
+          }
+          className="group flex size-12 items-center justify-center rounded-[1.1rem] bg-zinc-100 text-zinc-500 transition duration-200 hover:bg-zinc-950 hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-400/25 disabled:cursor-wait disabled:opacity-50 sm:size-14"
+        >
+          <span
+            aria-hidden="true"
+            className="transition-transform group-hover:-rotate-12"
           >
-            View profile
-          </Link>
+            ✕
+          </span>
+        </button>
+        <span aria-hidden="true" className="mx-2 h-7 w-px bg-zinc-200" />
+        <button
+          type="button"
+          aria-label={`Continue with ${currentProfile.name}`}
+          disabled={Boolean(exitDirection) || isSwipePending}
+          onClick={() =>
+            completeSwipe({
+              direction: FeedConstantsCollection.SwipeDirection.Right,
+            })
+          }
+          className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/30 group flex size-12 items-center justify-center rounded-[1.1rem] bg-gradient-to-br text-xl text-white shadow-[0_12px_26px_-12px_rgba(79,70,229,0.72)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-12px_rgba(79,70,229,0.86)] focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50 sm:size-14"
+        >
+          <span
+            aria-hidden="true"
+            className="transition-transform group-hover:scale-110"
+          >
+            ♥
+          </span>
+        </button>
+      </div>
 
-          {swipeError ? (
-            <p
-              role="alert"
-              className="mt-5 rounded-full bg-rose-50 px-4 py-2 text-center text-xs font-medium text-rose-700"
-            >
-              {swipeError}
-            </p>
-          ) : (
-            <p
-              role="status"
-              className="mt-5 text-center text-xs text-zinc-500"
-            >
-              {isSwipePending
-                ? "Saving your choice…"
-                : "Your choices are saved securely."}
-            </p>
-          )}
+      <Link
+        href={`/people/${currentProfile.id}`}
+        className="text-brand-700 hover:text-brand-600 focus-visible:ring-brand-600/20 relative z-40 mt-5 rounded-lg px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
+      >
+        View profile
+      </Link>
+
+      {swipeError ? (
+        <p
+          role="alert"
+          className="mt-5 rounded-full bg-rose-50 px-4 py-2 text-center text-xs font-medium text-rose-700"
+        >
+          {swipeError}
+        </p>
+      ) : (
+        <p role="status" className="mt-5 text-center text-xs text-zinc-500">
+          {isSwipePending
+            ? "Saving your choice…"
+            : "Your choices are saved securely."}
+        </p>
+      )}
     </div>
   );
 };

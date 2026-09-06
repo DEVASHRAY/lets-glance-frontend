@@ -11,12 +11,12 @@ export const LogoutSubmitButton = () => {
       aria-label={pending ? "Logging out" : "Log out"}
       disabled={pending}
       title={pending ? "Logging out…" : "Log out"}
-      className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-400/20 disabled:cursor-wait disabled:opacity-60"
+      className="border-brand-200/80 focus-visible:ring-brand-600/20 flex size-10 items-center justify-center rounded-xl border bg-white/75 text-zinc-600 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-60"
     >
       {pending ? (
         <span
           aria-hidden="true"
-          className="size-4 animate-spin rounded-full border-2 border-zinc-300 border-t-[#f32672]"
+          className="border-t-brand-600 size-4 animate-spin rounded-full border-2 border-zinc-300"
         />
       ) : (
         <svg

@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { LoginForm } from "@/features/auth/login-form";
+import { BrandConstantsCollection } from "@/features/brand/brand.constants";
+import { BrandMark } from "@/features/brand/brand-mark";
 
 export const metadata: Metadata = {
-  title: "Log in | Tinder Lite",
-  description: "Log in to discover and connect with new people.",
+  title: "Log in",
+  description: `Log in to ${BrandConstantsCollection.DisplayName} and continue your conversations.`,
 };
 
 const LoginPage = () => {
@@ -18,14 +20,14 @@ const LoginPage = () => {
     : undefined;
 
   return (
-    <main className="relative isolate min-h-svh flex-1 overflow-hidden bg-[#fff8f6] text-zinc-950">
+    <main className="bg-brand-surface relative isolate min-h-svh flex-1 overflow-hidden text-zinc-950">
       <div
         aria-hidden="true"
-        className="absolute -top-40 -left-40 size-96 rounded-full bg-[#fd267a]/15 blur-3xl"
+        className="bg-brand-400/20 absolute -top-40 -left-40 size-96 rounded-full blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="absolute right-[-8rem] bottom-[-10rem] size-[28rem] rounded-full bg-[#ff6036]/15 blur-3xl"
+        className="bg-brand-accent-300/20 absolute right-[-8rem] bottom-[-10rem] size-[28rem] rounded-full blur-3xl"
       />
 
       <div className="relative mx-auto grid min-h-svh w-full max-w-7xl lg:grid-cols-[1.08fr_0.92fr]">
@@ -34,36 +36,31 @@ const LoginPage = () => {
           className="hidden flex-col justify-between px-12 py-12 lg:flex xl:px-20 xl:py-16"
         >
           <div className="flex items-center gap-3 text-lg font-bold tracking-tight">
-            <span
-              aria-hidden="true"
-              className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fd267a] to-[#ff6036] text-xl text-white shadow-lg shadow-[#fd267a]/20"
-            >
-              ♥
-            </span>
-            Tinder Lite
+            <BrandMark className="shadow-brand-600/20 size-10 shadow-lg" />
+            {BrandConstantsCollection.DisplayName}
           </div>
 
           <div className="max-w-xl pb-12">
-            <p className="mb-5 text-sm font-bold tracking-[0.22em] text-[#e91e63] uppercase">
-              Built for the moment
+            <p className="text-brand-700 mb-5 text-sm font-bold tracking-[0.22em] uppercase">
+              Designed for a closer look
             </p>
             <h2
               id="brand-heading"
               className="text-5xl leading-[1.03] font-semibold tracking-[-0.045em] xl:text-7xl"
             >
-              Less waiting.
-              <span className="block bg-gradient-to-r from-[#fd267a] to-[#ff6036] bg-clip-text text-transparent">
-                More matching.
+              A quicker first look.
+              <span className="from-brand-600 to-brand-accent-600 block bg-gradient-to-r bg-clip-text text-transparent">
+                A better hello.
               </span>
             </h2>
             <p className="mt-7 max-w-lg text-lg leading-8 text-zinc-600">
-              A fast, focused way to discover people worth meeting—without the
-              noise getting in the way.
+              Thoughtful profiles make it easier to notice someone and start a
+              conversation without the noise.
             </p>
           </div>
 
           <p className="text-sm text-zinc-500">
-            Simple by design. Focused on connection.
+            Take a glance. Find a reason to say hello.
           </p>
         </section>
 
@@ -73,17 +70,12 @@ const LoginPage = () => {
         >
           <div className="w-full max-w-md">
             <div className="mb-8 flex items-center gap-3 text-lg font-bold tracking-tight lg:hidden">
-              <span
-                aria-hidden="true"
-                className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fd267a] to-[#ff6036] text-xl text-white shadow-lg shadow-[#fd267a]/20"
-              >
-                ♥
-              </span>
-              Tinder Lite
+              <BrandMark className="shadow-brand-600/20 size-10 shadow-lg" />
+              {BrandConstantsCollection.DisplayName}
             </div>
 
-            <div className="rounded-[2rem] border border-white bg-white p-6 shadow-[0_30px_80px_-30px_rgba(63,23,40,0.28)] sm:p-10">
-              <p className="text-sm font-bold tracking-[0.18em] text-[#e91e63] uppercase">
+            <div className="rounded-[2rem] border border-white bg-white p-6 shadow-[0_30px_80px_-30px_rgba(30,41,59,0.28)] sm:p-10">
+              <p className="text-brand-700 text-sm font-bold tracking-[0.18em] uppercase">
                 Welcome back
               </p>
               <h1
@@ -103,7 +95,7 @@ const LoginPage = () => {
                 New here?{" "}
                 <Link
                   href="/signup"
-                  className="font-medium text-zinc-700 underline-offset-4 hover:text-[#e91e63] hover:underline"
+                  className="hover:text-brand-700 font-medium text-zinc-700 underline-offset-4 hover:underline"
                 >
                   Sign up
                 </Link>

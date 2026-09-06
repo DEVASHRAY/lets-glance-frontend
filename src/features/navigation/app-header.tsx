@@ -8,6 +8,8 @@ import {
   initialLogoutActionState,
   logoutAction,
 } from "@/features/auth/logout.action";
+import { BrandConstantsCollection } from "@/features/brand/brand.constants";
+import { BrandMark } from "@/features/brand/brand-mark";
 import { LogoutSubmitButton } from "@/features/navigation/logout-submit-button";
 import { ProfileAvatar } from "@/features/profile/profile-avatar";
 
@@ -34,7 +36,7 @@ const HeaderLink = ({ children, href, icon }: HeaderLinkProps) => {
       aria-current={isActive ? "page" : undefined}
       className={
         isActive
-          ? "flex min-h-10 items-center gap-2 rounded-xl bg-[#fff0f5] px-3 text-sm font-semibold text-[#d91d60]"
+          ? "bg-brand-50 text-brand-700 flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold"
           : "flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950"
       }
     >
@@ -55,26 +57,23 @@ export const AppHeader = ({ viewer }: AppHeaderProps) => {
     pathname === "/profile" || pathname.startsWith("/profile/");
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-900/5 bg-white/80 backdrop-blur-xl">
+    <header className="border-brand-200/70 bg-brand-50/85 supports-[backdrop-filter]:bg-brand-50/75 sticky top-0 z-50 border-b shadow-[0_1px_0_rgba(79,70,229,0.04)] backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link
           href="/feed"
-          aria-label="Tinder Lite home"
-          className="flex shrink-0 items-center gap-3 font-bold tracking-[-0.02em] focus-visible:rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f32672]/20"
+          aria-label={`${BrandConstantsCollection.DisplayName} home`}
+          className="focus-visible:ring-brand-600/20 flex shrink-0 items-center gap-3 font-bold tracking-[-0.02em] focus-visible:rounded-xl focus-visible:outline-none focus-visible:ring-4"
         >
-          <span
-            aria-hidden="true"
-            className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#fd267a] to-[#ff6036] text-lg text-white shadow-[0_8px_20px_-8px_rgba(253,38,122,0.8)]"
-          >
-            ♥
+          <BrandMark className="size-9 shrink-0 shadow-[0_8px_20px_-8px_rgba(79,70,229,0.65)]" />
+          <span className="hidden sm:inline">
+            {BrandConstantsCollection.DisplayName}
           </span>
-          <span className="hidden sm:inline">Tinder Lite</span>
         </Link>
 
         {isPersonDetails ? null : (
           <nav
             aria-label="Primary navigation"
-            className="flex items-center rounded-2xl border border-zinc-200/70 bg-white/70 p-1 shadow-sm"
+            className="border-brand-200/70 flex items-center rounded-2xl border bg-white/65 p-1 shadow-sm"
           >
             <HeaderLink
               href="/feed"
@@ -89,7 +88,9 @@ export const AppHeader = ({ viewer }: AppHeaderProps) => {
                   strokeLinejoin="round"
                   strokeWidth="2"
                 >
-                  <path d="M12 21s-7-4.4-7-11a4 4 0 017-2.6A4 4 0 0119 10c0 6.6-7 11-7 11z" />
+                  <circle cx="12" cy="12" r="7" />
+                  <circle cx="12" cy="12" r="2" />
+                  <path d="M12 1v2M23 12h-2M12 23v-2M1 12h2" />
                 </svg>
               }
             >
@@ -146,7 +147,7 @@ export const AppHeader = ({ viewer }: AppHeaderProps) => {
             className={
               isProfileActive
                 ? "flex size-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-sm"
-                : "flex size-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-zinc-400/20"
+                : "border-brand-200/80 focus-visible:ring-brand-600/20 flex size-10 items-center justify-center rounded-full border bg-white/75 text-zinc-600 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4"
             }
           >
             {viewer ? (

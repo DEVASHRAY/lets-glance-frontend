@@ -19,6 +19,8 @@ import {
   initialSignupActionState,
   signupAction,
 } from "@/features/auth/signup.action";
+import { BrandConstantsCollection } from "@/features/brand/brand.constants";
+import { BrandMark } from "@/features/brand/brand-mark";
 import { ProfileConstantsCollection } from "@/features/profile/profile.constants";
 
 import styles from "./signup-flow.module.css";
@@ -132,7 +134,7 @@ const persistedSignupSchema = z.object({
 type SignupDraft = z.infer<typeof signupDraftSchema>;
 type PersistedSignup = z.infer<typeof persistedSignupSchema>;
 
-const SIGNUP_DRAFT_STORAGE_KEY = "tinder-lite:signup-draft";
+const CURRENT_SIGNUP_DRAFT_STORAGE_KEY = "lets-glance:signup-draft";
 const SIGNUP_DRAFT_SAVE_DELAY_MS = 200;
 const SIGNUP_STEP_ORDER: SignupStep[] = [
   SignupStep.Hook,
@@ -146,7 +148,7 @@ const SIGNUP_STEP_ORDER: SignupStep[] = [
 const SIGNUP_STEP_COUNT = SIGNUP_STEP_ORDER.length - 1;
 
 const INPUT_CLASS_NAME =
-  "min-h-14 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-[#fd267a] focus:ring-4 focus:ring-[#fd267a]/10 aria-invalid:border-rose-500 aria-invalid:ring-rose-500/10 disabled:cursor-wait disabled:bg-zinc-100 disabled:text-zinc-500";
+  "focus:border-brand-600 focus:ring-brand-600/10 min-h-14 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-base text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 hover:border-zinc-300 focus:ring-4 aria-invalid:border-rose-500 aria-invalid:ring-rose-500/10 disabled:cursor-wait disabled:bg-zinc-100 disabled:text-zinc-500";
 
 const GENDER_LABEL = {
   [ProfileConstantsCollection.UserGender.Female]: "Woman",
@@ -239,7 +241,9 @@ const getStepError = ({
 
 const readPersistedSignup = (): PersistedSignup | null => {
   try {
-    const serializedSignup = sessionStorage.getItem(SIGNUP_DRAFT_STORAGE_KEY);
+    const serializedSignup = sessionStorage.getItem(
+      CURRENT_SIGNUP_DRAFT_STORAGE_KEY,
+    );
 
     if (!serializedSignup) {
       return null;
@@ -269,8 +273,8 @@ const ChoiceInput = ({
     <label
       className={
         checked
-          ? "group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[#fd267a] bg-[#fff0f5] px-4 py-3 text-left text-[#b81550] shadow-[0_12px_30px_-22px_rgba(253,38,122,0.8)] transition focus-within:ring-4 focus-within:ring-[#fd267a]/10"
-          : "group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-left text-zinc-700 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md focus-within:border-[#fd267a] focus-within:ring-4 focus-within:ring-[#fd267a]/10"
+          ? "border-brand-600 bg-brand-50 text-brand-700 focus-within:ring-brand-600/10 group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left shadow-[0_12px_30px_-22px_rgba(79,70,229,0.7)] transition focus-within:ring-4"
+          : "focus-within:border-brand-600 focus-within:ring-brand-600/10 group flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-left text-zinc-700 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md focus-within:ring-4"
       }
     >
       <span className="min-w-0">
@@ -293,7 +297,7 @@ const ChoiceInput = ({
         aria-hidden="true"
         className={
           checked
-            ? "flex size-5 shrink-0 items-center justify-center rounded-full bg-[#fd267a] text-white"
+            ? "bg-brand-600 flex size-5 shrink-0 items-center justify-center rounded-full text-white"
             : "size-5 shrink-0 rounded-full border-2 border-zinc-300 bg-white"
         }
       >
@@ -323,7 +327,7 @@ const StepIntro = ({
 }: StepIntroProps) => {
   return (
     <div>
-      <p className="text-xs font-bold tracking-[0.2em] text-[#d91d60] uppercase">
+      <p className="text-brand-700 text-xs font-bold tracking-[0.2em] uppercase">
         {eyebrow}
       </p>
       <h1
@@ -342,7 +346,7 @@ const StepIntro = ({
 };
 
 const ProfilePreview = ({ draft }: ProfilePreviewProps) => {
-  const initial = draft.name.trim().charAt(0).toUpperCase() || "♥";
+  const initial = draft.name.trim().charAt(0).toUpperCase() || "✦";
   const detailParts = [draft.jobTitle.trim(), draft.city.trim()].filter(
     (part) => Boolean(part),
   );
@@ -373,8 +377,8 @@ const ProfilePreview = ({ draft }: ProfilePreviewProps) => {
           Live profile preview
         </p>
       </div>
-      <article className="relative overflow-hidden rounded-[2rem] bg-zinc-950 text-white shadow-[0_36px_90px_-32px_rgba(63,23,40,0.55)]">
-        <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(circle_at_30%_20%,#ff8fb0_0%,#fd267a_32%,#ff6036_72%,#7a183d_100%)]">
+      <article className="relative overflow-hidden rounded-[2rem] bg-zinc-950 text-white shadow-[0_36px_90px_-32px_rgba(30,41,59,0.55)]">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(circle_at_30%_20%,#93c5fd_0%,#4f46e5_34%,#2563eb_72%,#172554_100%)]">
           <div
             aria-hidden="true"
             className="absolute -top-12 -right-10 size-52 rounded-full border border-white/20 bg-white/10 blur-sm"
@@ -463,7 +467,7 @@ const SignupSubmitButton = ({
     <button
       type="submit"
       disabled={disabled || pending}
-      className="group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#fd267a] to-[#ff6036] px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(253,38,122,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(253,38,122,0.9)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/25 disabled:cursor-wait disabled:opacity-65 disabled:hover:translate-y-0"
+      className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/25 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(79,70,229,0.68)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(79,70,229,0.82)] focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-65 disabled:hover:translate-y-0"
     >
       {pending ? (
         <>
@@ -621,7 +625,7 @@ export const SignupFlow = () => {
     const saveTimer = window.setTimeout(() => {
       try {
         sessionStorage.setItem(
-          SIGNUP_DRAFT_STORAGE_KEY,
+          CURRENT_SIGNUP_DRAFT_STORAGE_KEY,
           JSON.stringify({
             draft,
             step: step === SignupStep.Hook && resumeStep ? resumeStep : step,
@@ -682,7 +686,7 @@ export const SignupFlow = () => {
     }
 
     try {
-      sessionStorage.removeItem(SIGNUP_DRAFT_STORAGE_KEY);
+      sessionStorage.removeItem(CURRENT_SIGNUP_DRAFT_STORAGE_KEY);
     } catch {
       // Redirect even if privacy settings prevent storage cleanup.
     }
@@ -699,7 +703,7 @@ export const SignupFlow = () => {
     setDraftPersistenceEnabled(false);
 
     try {
-      sessionStorage.removeItem(SIGNUP_DRAFT_STORAGE_KEY);
+      sessionStorage.removeItem(CURRENT_SIGNUP_DRAFT_STORAGE_KEY);
     } catch {
       // Reset the in-memory draft even when browser storage is unavailable.
     }
@@ -830,37 +834,32 @@ export const SignupFlow = () => {
       action={formAction}
       aria-busy={isPending || state.success}
       onSubmit={(event) => handleSignupSubmit({ event })}
-      className="relative isolate min-h-svh overflow-x-hidden bg-[#fff8f6] text-zinc-950"
+      className="bg-brand-surface relative isolate min-h-svh overflow-x-hidden text-zinc-950"
     >
       <HiddenProfileFields draft={draft} mode={mode} session={signupSession} />
 
       <div
         aria-hidden="true"
-        className={`${styles.ambientOrb} absolute -top-40 -left-40 size-[28rem] rounded-full bg-[#fd267a]/15 blur-3xl`}
+        className={`${styles.ambientOrb} bg-brand-400/20 absolute -top-40 -left-40 size-[28rem] rounded-full blur-3xl`}
       />
       <div
         aria-hidden="true"
-        className={`${styles.ambientOrbDelayed} absolute right-[-12rem] bottom-[-12rem] size-[34rem] rounded-full bg-[#ff6036]/15 blur-3xl`}
+        className={`${styles.ambientOrbDelayed} bg-brand-accent-300/20 absolute right-[-12rem] bottom-[-12rem] size-[34rem] rounded-full blur-3xl`}
       />
 
       <header className="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
         <Link
           href="/login"
-          className="flex min-h-11 items-center gap-2.5 rounded-xl pr-3 font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/20"
+          className="focus-visible:ring-brand-600/20 flex min-h-11 items-center gap-2.5 rounded-xl pr-3 font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-4"
         >
-          <span
-            aria-hidden="true"
-            className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#fd267a] to-[#ff6036] text-sm text-white shadow-lg shadow-[#fd267a]/20"
-          >
-            ♥
-          </span>
-          Tinder Lite
+          <BrandMark className="shadow-brand-600/20 size-9 shadow-lg" />
+          {BrandConstantsCollection.DisplayName}
         </Link>
 
         {step === SignupStep.Hook ? (
           <Link
             href="/login"
-            className="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/15"
+            className="focus-visible:ring-brand-600/15 flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4"
           >
             Log in
           </Link>
@@ -869,7 +868,7 @@ export const SignupFlow = () => {
             type="button"
             disabled={isPending || state.success}
             onClick={goBack}
-            className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/15 disabled:cursor-wait disabled:opacity-50"
+            className="focus-visible:ring-brand-600/15 flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50"
           >
             <span aria-hidden="true">←</span>
             Back
@@ -899,7 +898,7 @@ export const SignupFlow = () => {
           >
             <div
               aria-hidden="true"
-              className="h-full bg-[#d91d60] transition-[width] duration-300 motion-reduce:transition-none"
+              className="bg-brand-700 h-full transition-[width] duration-300 motion-reduce:transition-none"
               style={{
                 width: `${String((stepIndex / SIGNUP_STEP_COUNT) * 100)}%`,
               }}
@@ -919,20 +918,20 @@ export const SignupFlow = () => {
                 <StepIntro
                   headingRef={headingRef}
                   eyebrow="A profile worth opening"
-                  title="Meet people who match your pace."
+                  title="Meet people worth a second glance."
                   description="A few thoughtful choices create a profile that feels like you. You can finish in your own time, and optional details can always wait."
                 />
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
                   {[
                     ["01", "Tell us the basics"],
                     ["02", "Choose your vibe"],
-                    ["03", "Start matching"],
+                    ["03", "Start connecting"],
                   ].map(([number, label]) => (
                     <div
                       key={number}
                       className="rounded-2xl border border-white bg-white/75 p-4 shadow-sm backdrop-blur-sm"
                     >
-                      <span className="text-xs font-bold text-[#d91d60]">
+                      <span className="text-brand-700 text-xs font-bold">
                         {number}
                       </span>
                       <p className="mt-2 text-sm font-semibold text-zinc-800">
@@ -1016,7 +1015,8 @@ export const SignupFlow = () => {
                   </div>
                 </div>
                 <p className="mt-3 text-xs leading-5 text-zinc-500">
-                  Tinder Lite is for adults aged 18 and over.
+                  {BrandConstantsCollection.DisplayName} is for adults aged 18
+                  and over.
                 </p>
               </div>
             ) : null}
@@ -1378,7 +1378,7 @@ export const SignupFlow = () => {
                             name="resendOtp"
                             value="true"
                             formNoValidate
-                            className="min-h-11 rounded-xl px-3 text-sm font-semibold text-[#d91d60] transition hover:bg-[#fff0f5] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/15"
+                            className="text-brand-700 hover:bg-brand-50 focus-visible:ring-brand-600/15 min-h-11 rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4"
                           >
                             Send code again
                           </button>
@@ -1568,7 +1568,7 @@ export const SignupFlow = () => {
                     mode === SignupConstantsCollection.SignupMode.Password
                       ? "Create my account"
                       : isOtpCodeStep
-                        ? "Verify and start matching"
+                        ? "Verify and start exploring"
                         : "Email me a code"
                   }
                   pendingLabel={
@@ -1592,7 +1592,7 @@ export const SignupFlow = () => {
                         ? showPasswordSignup
                         : showOtpSignup
                     }
-                    className="min-h-11 rounded-lg px-2 font-semibold text-[#d91d60] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/15 disabled:cursor-wait disabled:opacity-50"
+                    className="text-brand-700 focus-visible:ring-brand-600/15 min-h-11 rounded-lg px-2 font-semibold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 disabled:cursor-wait disabled:opacity-50"
                   >
                     {mode === SignupConstantsCollection.SignupMode.Otp
                       ? "Use a password"
@@ -1604,7 +1604,7 @@ export const SignupFlow = () => {
               <OptionalStepActions onSkip={skipOptionalStep}>
                 <button
                   type="submit"
-                  className="group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#fd267a] to-[#ff6036] px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(253,38,122,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(253,38,122,0.9)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/25"
+                  className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/25 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(79,70,229,0.68)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(79,70,229,0.82)] focus-visible:outline-none focus-visible:ring-4"
                 >
                   {getStepActionLabel({ step })}
                   <span
@@ -1619,7 +1619,7 @@ export const SignupFlow = () => {
               <div className="space-y-3">
                 <button
                   type="submit"
-                  className="group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#fd267a] to-[#ff6036] px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(253,38,122,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(253,38,122,0.9)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#fd267a]/25"
+                  className="from-brand-600 to-brand-accent-600 focus-visible:ring-brand-600/25 group flex min-h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r px-6 text-base font-semibold text-white shadow-[0_18px_40px_-16px_rgba(79,70,229,0.68)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-16px_rgba(79,70,229,0.82)] focus-visible:outline-none focus-visible:ring-4"
                 >
                   {step === SignupStep.Hook && resumeStep
                     ? "Continue my profile"
