@@ -159,7 +159,10 @@ export const otpLoginAction = async (
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          purpose: AuthConstantsCollection.OtpPurpose.Login,
+        }),
         signal: AbortSignal.timeout(AUTH_REQUEST_TIMEOUT_MS),
       });
       const responseMessage = await readOtpSendMessage({ response });

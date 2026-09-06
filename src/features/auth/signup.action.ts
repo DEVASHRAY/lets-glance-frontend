@@ -428,7 +428,10 @@ export const signupAction = async (
           headers: {
             "content-type": "application/json",
           },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({
+            email,
+            purpose: AuthConstantsCollection.OtpPurpose.Signup,
+          }),
           signal: AbortSignal.timeout(AUTH_REQUEST_TIMEOUT_MS),
         });
         const responseMessage = await readOtpSendMessage({ response });
