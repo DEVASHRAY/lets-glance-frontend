@@ -1,5 +1,7 @@
 "use client";
 
+import { z } from "zod";
+
 import { AuthConstantsCollection } from "@/features/auth/auth.constants";
 
 type OtpLoginStep =
@@ -38,6 +40,10 @@ export const initialLoginActionState: LoginActionState = {
 
 const AUTH_REQUEST_TIMEOUT_MS = 10_000;
 
+const otpSendResponseSchema = z.object({
+  message: z.string().trim().min(1),
+});
+
 const readField = ({ formData, name }: ReadFieldInput): string => {
   const value = formData.get(name);
 
@@ -52,19 +58,11 @@ const readOtpSendMessage = async ({
   response,
 }: ReadResponseMessageInput): Promise<string> => {
   try {
-    const responseText = await response.text();
+    const parsedResponse = otpSendResponseSchema.safeParse(
+      await response.json(),
+    );
 
-    if (
-      responseText.includes(AuthConstantsCollection.OtpSendMessage.AlreadySent)
-    ) {
-      return AuthConstantsCollection.OtpSendMessage.AlreadySent;
-    }
-
-    if (responseText.includes(AuthConstantsCollection.OtpSendMessage.Sent)) {
-      return AuthConstantsCollection.OtpSendMessage.Sent;
-    }
-
-    return "";
+    return parsedResponse.success ? parsedResponse.data.message : "";
   } catch {
     return "";
   }
@@ -171,10 +169,7 @@ export const otpLoginAction = async (
         return {
           email,
           isError: true,
-          message:
-            response.status === 429
-              ? "Too many code requests. Please wait before trying again."
-              : "Unable to send a verification code",
+          message: responseMessage || "Unable to send a verification code",
           step: AuthConstantsCollection.OtpLoginStep.Email,
           success: false,
         };
