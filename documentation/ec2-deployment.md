@@ -19,23 +19,41 @@ Keep these values outside Git, for example in a root-owned
 
 ```dotenv
 BACKEND_API_ORIGIN=http://127.0.0.1:4000
-NEXT_PUBLIC_SOCKET_ORIGIN=https://letsglance.in
 ```
 
 `BACKEND_API_ORIGIN` is the existing server-only variable name used by the BFF.
 Its value remains private and can be changed when the Next.js process restarts.
-`NEXT_PUBLIC_SOCKET_ORIGIN` is intentionally public and is inlined into browser
-JavaScript during `npm run build`; changing it requires a rebuild. Do not set
-the development-only `DEV_LOGIN_EMAIL` or `DEV_LOGIN_PASSWORD` in production.
+Do not set `NEXT_PUBLIC_SOCKET_ORIGIN` in production. The production chat
+client passes no Socket.IO URI, so the browser uses the page origin and reaches
+`wss://letsglance.in/socket.io/` through Nginx. Production builds ignore the
+public variable even if a stale value is present.
+
+Configure the Express service separately with:
+
+```dotenv
+ALLOWED_WEB_ORIGIN=https://letsglance.in
+```
+
+Do not set the development-only `DEV_LOGIN_EMAIL` or `DEV_LOGIN_PASSWORD` in
+production.
 
 The Express deployment must use its existing configuration to:
 
 - bind HTTP and Socket.IO to `127.0.0.1:4000`;
-- accept the browser Socket.IO origin `https://letsglance.in`;
+- accept `ALLOWED_WEB_ORIGIN=https://letsglance.in`;
 - issue the production authentication cookie over HTTPS.
 
 The backend repository owns those variable names; do not invent frontend
 aliases for them.
+
+## Local development
+
+Only local development may set a separate browser Socket.IO origin when Next.js
+runs on port 3000 and Express runs on port 4000:
+
+```bash
+NEXT_PUBLIC_SOCKET_ORIGIN=http://localhost:4000 npm run dev
+```
 
 ## Build and start
 
@@ -45,20 +63,19 @@ Router rendering, Proxy, image optimization, Server Actions, and Route
 Handlers. `npm run build` also copies `.next/static` and an optional `public`
 directory into the standalone tree, as required by the Next.js output guide.
 
-Run the build with the public socket origin already present:
+Build without a public Socket.IO origin:
 
 ```bash
 cd /srv/lets-glance/frontend
 npm ci
-NEXT_PUBLIC_SOCKET_ORIGIN=https://letsglance.in npm run build
+npm run build
 BACKEND_API_ORIGIN=http://127.0.0.1:4000 npm run start
 ```
 
 `npm run start` launches `.next/standalone/server.js` on
 `127.0.0.1:3000`. Build and run with Node.js 20.9 or newer, matching the
-installed Next.js engine requirement. The runtime still needs
-`BACKEND_API_ORIGIN`; the `NEXT_PUBLIC_*` value at runtime cannot replace the
-value baked into the build.
+installed Next.js engine requirement. The runtime still needs the server-only
+`BACKEND_API_ORIGIN`.
 
 ## systemd
 
@@ -144,5 +161,5 @@ the browser and inspect `journalctl -u lets-glance-frontend` plus Nginx logs.
 Keep the prior build or release directory until verification completes. A
 rollback restores the previous release, restarts the frontend service, reloads
 Nginx only if its config changed, and repeats the checks above. Never rebuild
-the old release during rollback because that could inline different
-`NEXT_PUBLIC_*` values.
+the old release during rollback because that produces a new artifact instead
+of restoring the one previously verified.
