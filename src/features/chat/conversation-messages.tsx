@@ -57,6 +57,7 @@ type RenderedMessage = MessageHistoryItem | OptimisticMessage;
 interface MessageSubmitButtonProps {
   messageIsEmpty: boolean;
   pending: boolean;
+  shouldPreserveComposerFocus: () => boolean;
 }
 
 interface PendingScrollRestoration {
@@ -101,11 +102,17 @@ const insertMessage = ({
 const MessageSubmitButton = ({
   messageIsEmpty,
   pending,
+  shouldPreserveComposerFocus,
 }: MessageSubmitButtonProps) => {
   return (
     <button
       type="submit"
       disabled={pending || messageIsEmpty}
+      onPointerDown={(event) => {
+        if (shouldPreserveComposerFocus()) {
+          event.preventDefault();
+        }
+      }}
       className="bg-brand-600 hover:bg-brand-700 focus-visible:ring-brand-600/25 flex size-11 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50"
       aria-label={pending ? "Sending message" : "Send message"}
     >
@@ -905,12 +912,24 @@ export const ConversationMessages = ({
       <form
         onSubmit={(event) => {
           event.preventDefault();
+          const textarea = messageTextarea.current;
+          const shouldRetainComposerFocus = Boolean(
+            textarea && document.activeElement === textarea,
+          );
           const formData = new FormData(event.currentTarget);
 
           setMessageText("");
           startTransition(() => {
             sendMessageFormAction(formData);
           });
+
+          if (
+            shouldRetainComposerFocus &&
+            textarea &&
+            document.activeElement !== textarea
+          ) {
+            textarea.focus({ preventScroll: true });
+          }
         }}
         className="shrink-0 border-t border-zinc-100 bg-white p-3"
       >
@@ -960,6 +979,9 @@ export const ConversationMessages = ({
           <MessageSubmitButton
             messageIsEmpty={!messageText.trim()}
             pending={sendMessagePending}
+            shouldPreserveComposerFocus={() =>
+              document.activeElement === messageTextarea.current
+            }
           />
         </div>
 

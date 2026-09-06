@@ -36,18 +36,24 @@ img {
         env(safe-area-inset-top, 0px) - 4rem
     )
   );
+  background-color: var(--color-brand-surface);
   overflow: hidden;
+  overscroll-behavior: none;
   padding-block-start: 1rem;
   padding-block-end: max(1rem, env(safe-area-inset-bottom, 0px));
   padding-inline-start: max(1rem, env(safe-area-inset-left, 0px));
   padding-inline-end: max(1rem, env(safe-area-inset-right, 0px));
 }
 
+html.chat-document-locked,
+body.chat-document-locked,
 html:has(.chat-route-surface),
 body:has(.chat-route-surface) {
   background-color: var(--color-brand-surface);
 }
 
+html.chat-document-locked,
+body.chat-document-locked,
 html:has(.chat-conversation-shell),
 body:has(.chat-conversation-shell) {
   height: 100%;
@@ -55,7 +61,7 @@ body:has(.chat-conversation-shell) {
   overscroll-behavior-y: none;
 }
 
-body:has(.chat-conversation-shell) {
+body.chat-document-locked {
   position: fixed;
   inset: 0;
   width: 100%;
