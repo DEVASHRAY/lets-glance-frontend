@@ -20,3 +20,69 @@ img {
   -webkit-user-select: none;
   user-select: none;
 }
+
+.chat-conversation-shell {
+  position: fixed;
+  inset-inline: 0;
+  top: calc(
+    var(--chat-visual-viewport-top, 0px) + env(safe-area-inset-top, 0px) + 4rem
+  );
+  height: calc(100vh - env(safe-area-inset-top, 0px) - 4rem);
+  height: calc(100dvh - env(safe-area-inset-top, 0px) - 4rem);
+  height: max(
+    0px,
+    calc(
+      var(--chat-visual-viewport-height, 100dvh) -
+        env(safe-area-inset-top, 0px) - 4rem
+    )
+  );
+  overflow: hidden;
+  padding-block-start: 1rem;
+  padding-block-end: max(1rem, env(safe-area-inset-bottom, 0px));
+  padding-inline-start: max(1rem, env(safe-area-inset-left, 0px));
+  padding-inline-end: max(1rem, env(safe-area-inset-right, 0px));
+}
+
+html:has(.chat-conversation-shell),
+body:has(.chat-conversation-shell) {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior-y: none;
+  background-color: var(--color-brand-surface);
+}
+
+body:has(.chat-conversation-shell) .chat-viewport-header {
+  position: fixed;
+  inset-inline: 0;
+  top: var(--chat-visual-viewport-top, 0px);
+  padding-block-start: env(safe-area-inset-top, 0px);
+}
+
+body:has(.chat-conversation-shell) .chat-viewport-header > div {
+  padding-inline-start: max(1rem, env(safe-area-inset-left, 0px));
+  padding-inline-end: max(1rem, env(safe-area-inset-right, 0px));
+}
+
+.chat-message-textarea {
+  font-size: 0.875rem;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .chat-message-textarea {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 40rem) {
+  .chat-conversation-shell {
+    padding-block-start: 1.5rem;
+    padding-block-end: max(1.5rem, env(safe-area-inset-bottom, 0px));
+    padding-inline-start: max(1.5rem, env(safe-area-inset-left, 0px));
+    padding-inline-end: max(1.5rem, env(safe-area-inset-right, 0px));
+  }
+
+  body:has(.chat-conversation-shell) .chat-viewport-header > div {
+    padding-inline-start: max(1.5rem, env(safe-area-inset-left, 0px));
+    padding-inline-end: max(1.5rem, env(safe-area-inset-right, 0px));
+  }
+}

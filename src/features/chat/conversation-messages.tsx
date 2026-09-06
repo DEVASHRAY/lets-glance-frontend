@@ -808,7 +808,7 @@ export const ConversationMessages = ({
             requestOlderMessages();
           }
         }}
-        className="bg-brand-surface/70 focus-visible:ring-brand-600/25 min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none [&::-webkit-scrollbar]:hidden"
+        className="bg-brand-surface/70 focus-visible:ring-brand-600/25 min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-none [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none [&::-webkit-scrollbar]:hidden"
       >
         {optimisticMessages.length ? (
           <ol
@@ -961,7 +961,7 @@ export const ConversationMessages = ({
             rows={1}
             enterKeyHint="send"
             placeholder="Write a message"
-            className="focus:border-brand-600/50 focus:ring-brand-600/10 max-h-32 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm leading-5 outline-none transition placeholder:text-zinc-400 focus:bg-white focus:ring-4"
+            className="chat-message-textarea focus:border-brand-600/50 focus:ring-brand-600/10 max-h-32 min-h-11 flex-1 resize-none overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 leading-5 outline-none transition placeholder:text-zinc-400 focus:bg-white focus:ring-4"
           />
           <MessageSubmitButton
             messageIsEmpty={!messageText.trim()}

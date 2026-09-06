@@ -57,7 +57,7 @@ export const AppHeader = ({ viewer }: AppHeaderProps) => {
     pathname === "/profile" || pathname.startsWith("/profile/");
 
   return (
-    <header className="border-brand-200/70 bg-brand-50/85 supports-[backdrop-filter]:bg-brand-50/75 sticky top-0 z-50 border-b shadow-[0_1px_0_rgba(79,70,229,0.04)] backdrop-blur-xl">
+    <header className="chat-viewport-header border-brand-200/70 bg-brand-50/85 supports-[backdrop-filter]:bg-brand-50/75 sticky top-0 z-50 border-b shadow-[0_1px_0_rgba(79,70,229,0.04)] backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link
           href="/feed"

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -12,6 +12,12 @@ import { ProfileAvatar } from "@/features/profile/profile-avatar";
 export const metadata: Metadata = {
   title: "Conversation",
   description: "Read your conversation.",
+};
+
+export const viewport: Viewport = {
+  interactiveWidget: "resizes-content",
+  themeColor: "#f8fafc",
+  viewportFit: "cover",
 };
 
 const ChatConversationPage = async ({
@@ -79,7 +85,7 @@ const ChatConversationPage = async ({
   const peerName = result.peer.name ?? "Member";
 
   return (
-    <main className="bg-brand-surface fixed inset-x-0 top-16 bottom-0 overflow-hidden px-4 py-4 text-zinc-950 sm:px-6 sm:py-6">
+    <main className="chat-conversation-shell bg-brand-surface text-zinc-950">
       <section className="mx-auto flex h-full min-h-0 max-w-2xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
         <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-zinc-100 px-4">
           <Link
@@ -144,6 +150,11 @@ export default ChatConversationPage;
  * Next.js 16 generated `PageProps` provides the typed dynamic route parameter,
  * and `params` must be awaited before reading `connectionId`. Next.js 14.1
  * commonly used handwritten props and exposed route parameters synchronously.
+ *
+ * The static viewport export enables safe-area insets and asks supporting
+ * browsers to resize for the software keyboard without restricting user zoom.
+ * Next.js 14.1 exposed the same static API, but iOS still needs the layout's
+ * Visual Viewport fallback because WebKit does not honor `interactiveWidget`.
  *
  * Node's `randomUUID` creates a non-secret idempotency key on the server. The
  * Client Component preserves it for retries and rotates it after a successful
